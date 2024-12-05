@@ -1,13 +1,13 @@
+import 'dart:async';
 import 'dart:typed_data';
-import 'dart:ui';
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:location/location.dart';
-import 'routes_screen.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'dart:convert';
+import 'package:flutter/services.dart';
+import 'routes_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -21,117 +21,124 @@ class _HomeScreenState extends State<HomeScreen> {
   final Location location = Location();
   LocationData? _currentLocation;
   PointAnnotationManager? pointAnnotationManager;
-  List<Map<String, dynamic>> stops = []; // List to hold stops data
+  List<Map<String, dynamic>> stops = [];
+  Timer? debounceTimer;
+  PointAnnotation? locationIndicator; // Custom location marker
 
-  // Callback for when the map is created
-  void _onMapCreated(MapboxMap mapboxMap) async {
+  static const String stopsApiUrl = 'https://api.thebus.info/v1/stops';
+  static const String stopImageUrl = 'https://s3.qube24.com/cdn/bus_stop.png';
+
+  @override
+  void dispose() {
+    debounceTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _onMapCreated(MapboxMap mapboxMap) async {
     this.mapboxMap = mapboxMap;
     pointAnnotationManager = await mapboxMap.annotations.createPointAnnotationManager();
 
-    // Initialize location tracking
     await _initializeLocationTracking();
-
-    // Fetch stops from the API
     await _fetchStops();
-
-    // Add image annotations for each stop
     await _addStopAnnotations();
   }
 
-  // Fetch the stops data from the API
   Future<void> _fetchStops() async {
-  try {
-    final response = await http.get(Uri.parse('https://api.thebus.info/v1/stops'));
-
-    if (response.statusCode == 200) {
-      // Parse the JSON response body
-      List<dynamic> responseData = json.decode(response.body);
-
-      setState(() {
-        stops = responseData.map((stop) => {
-          "id": stop["id"],
-          "name": stop["name"],
-          "latitude": double.parse(stop["latitude"]),
-          "longitude": double.parse(stop["longitude"]),
-          "route_id": stop["route_id"],
-        }).toList();
-      });
-    } else {
-      print('Failed to fetch stops: ${response.statusCode}');
+    try {
+      final response = await http.get(Uri.parse(stopsApiUrl));
+      if (response.statusCode == 200) {
+        List<dynamic> responseData = json.decode(response.body);
+        setState(() {
+          stops = responseData.map((stop) {
+            return {
+              "id": stop["id"],
+              "name": stop["name"],
+              "latitude": double.parse(stop["latitude"]),
+              "longitude": double.parse(stop["longitude"]),
+              "route_id": stop["route_id"],
+            };
+          }).toList();
+        });
+      } else {
+        _showError('Failed to fetch stops: ${response.statusCode}');
+      }
+    } catch (e) {
+      _showError('Error fetching stops: $e');
     }
-  } catch (e) {
-    print('Error fetching stops: $e');
   }
-}
 
-  // Load the custom image for each stop from URL and add annotations
   Future<void> _addStopAnnotations() async {
-    for (var stop in stops) {
-      final response = await http.get(Uri.parse('https://s3.qube24.com/cdn/bus_stop.png'));
-
+    try {
+      final response = await http.get(Uri.parse(stopImageUrl));
       if (response.statusCode == 200) {
         final Uint8List imageData = response.bodyBytes;
-
-        // Create a PointAnnotationOptions for each stop
-        PointAnnotationOptions pointAnnotationOptions = PointAnnotationOptions(
-          geometry: Point(coordinates: Position(stop['longitude'], stop['latitude'])),
-          image: imageData,
-          iconSize: 0.3,
-          textField: stop['name'],
-          textOffset: [0.0, -2.0],
-          textColor: Colors.white.value,
-          textHaloBlur: 10,
-          textHaloColor: Colors.black.value,
-          iconOffset: [0.0, -5.0],
-          
-        );
-
-        // Add the annotation for the stop to the map
-        pointAnnotationManager?.create(pointAnnotationOptions);
+        await Future.wait(stops.map((stop) async {
+          final pointAnnotationOptions = PointAnnotationOptions(
+            geometry: Point(coordinates: Position(stop['longitude'], stop['latitude'])),
+            image: imageData,
+            iconSize: 0.3,
+            textField: stop['name'],
+            textOffset: [0.0, -2.0],
+            textColor: Colors.white.value,
+            textHaloBlur: 10,
+            textHaloColor: Colors.black.value,
+          );
+          await pointAnnotationManager?.create(pointAnnotationOptions);
+        }));
       } else {
-        print('Failed to load image for stop: ${stop['name']}');
+        _showError('Failed to load stop image.');
       }
+    } catch (e) {
+      _showError('Error loading stop annotations: $e');
     }
   }
 
-  // Initialize location tracking and set up a custom 3D puck
   Future<void> _initializeLocationTracking() async {
-    bool serviceEnabled = await location.serviceEnabled();
-    if (!serviceEnabled) {
-      serviceEnabled = await location.requestService();
+    if (!await location.serviceEnabled()) {
+      if (!await location.requestService()) return;
     }
-    if (!serviceEnabled) return;
 
-    PermissionStatus permissionGranted = await location.hasPermission();
-    if (permissionGranted == PermissionStatus.denied) {
-      permissionGranted = await location.requestPermission();
+    if (await location.hasPermission() == PermissionStatus.denied) {
+      if (await location.requestPermission() != PermissionStatus.granted) return;
     }
-    if (permissionGranted != PermissionStatus.granted) return;
 
-    // Start listening for location updates
     location.onLocationChanged.listen((LocationData currentLocation) {
-      _currentLocation = currentLocation;
-      _updateCamera(currentLocation);
-      debugPrint("Current location: ${currentLocation.latitude}, ${currentLocation.longitude}");
+      debounceTimer?.cancel();
+      debounceTimer = Timer(const Duration(seconds: 1), () {
+        _currentLocation = currentLocation;
+        _updateCamera(currentLocation);
+      });
     });
   }
 
-  // Update the camera position based on current location
   Future<void> _updateCamera(LocationData locationData) async {
-    final latitude = locationData.latitude;
-    final longitude = locationData.longitude;
+    if (locationData.latitude != null && locationData.longitude != null) {
+      mapboxMap.location.updateSettings(LocationComponentSettings(
+    locationPuck: LocationPuck(
 
-    if (latitude != null && longitude != null) {
-      debugPrint("Updating camera to: $latitude, $longitude");
+
+        locationPuck3D: LocationPuck3D(
+          modelCastShadows: true,
+          modelScale: [20,17,20],
+          modelReceiveShadows: true,
+          modelEmissiveStrength: 4,
+            modelUri:
+                "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Embedded/Duck.gltf",)
+                )));
       mapboxMap.setCamera(
         CameraOptions(
-          center: Point(coordinates: Position(longitude, latitude)),
+          center: Point(coordinates: Position(locationData.longitude!, locationData.latitude!)),
           zoom: 16.3,
           pitch: 30,
-          padding: MbxEdgeInsets(top: 0, left: 0, bottom: 50, right: 0),
         ),
       );
     }
+  }
+
+
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -139,8 +146,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Map widget as background
           MapWidget(
+            
             key: const ValueKey("mapWidget"),
             cameraOptions: CameraOptions(
               center: Point(
@@ -155,9 +162,7 @@ class _HomeScreenState extends State<HomeScreen> {
             styleUri: "mapbox://styles/szocske23/cm4brvrj900pb01r1eq8z9spy",
             textureView: true,
             onMapCreated: _onMapCreated,
-
           ),
-          // Custom Floating Bar
           Positioned(
             bottom: 0,
             left: 0,
@@ -167,7 +172,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Container(
                 height: 320,
                 decoration: BoxDecoration(
-                  color: Color.fromARGB(255, 0, 0, 0), // Semi-transparent background
+                  color: Colors.black,
                   borderRadius: BorderRadius.circular(46),
                   boxShadow: [
                     BoxShadow(
@@ -181,23 +186,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     IconButton(
-                      icon: const Icon(
-                        FontAwesomeIcons.bus,
-                        color: Colors.black,
-                        size: 20,
-                      ),
+                      icon: const FaIcon(FontAwesomeIcons.map, color: Colors.white, size: 24),
                       onPressed: () {
-                        // Action for Map button
+                        // Map button action
                       },
                     ),
                     IconButton(
-                      icon: const Icon(
-                        FontAwesomeIcons.bus,
-                        color: Colors.black,
-                        size: 20,
-                      ),
+                      icon: const FaIcon(FontAwesomeIcons.route, color: Colors.white, size: 24),
                       onPressed: () {
-                        // Navigate to Routes screen
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -207,23 +203,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                     ),
                     IconButton(
-                      icon: const Icon(
-                        FontAwesomeIcons.bus,
-                        color: Colors.black,
-                        size: 20,
-                      ),
+                      icon: const FaIcon(FontAwesomeIcons.ticket, color: Colors.white, size: 24),
                       onPressed: () {
-                        // Action for Ticket button
+                        // Ticket button action
                       },
                     ),
                     IconButton(
-                      icon: const Icon(
-                        FontAwesomeIcons.bus,
-                        color: Colors.black,
-                        size: 20,
-                      ),
+                      icon: const FaIcon(FontAwesomeIcons.user, color: Colors.white, size: 24),
                       onPressed: () {
-                        // Action for Profile button
+                        // Profile button action
                       },
                     ),
                   ],
