@@ -104,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     location.onLocationChanged.listen((LocationData currentLocation) {
       debounceTimer?.cancel();
-      debounceTimer = Timer(const Duration(seconds: 1), () {
+      debounceTimer = Timer(const Duration(seconds: 0), () {
         _currentLocation = currentLocation;
         _updateCamera(currentLocation);
       });
@@ -114,8 +114,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _updateCamera(LocationData locationData) async {
     if (locationData.latitude != null && locationData.longitude != null) {
       mapboxMap.location.updateSettings(LocationComponentSettings(
+        puckBearingEnabled: true,
+        showAccuracyRing: true,
+        puckBearing: PuckBearing.HEADING,
+        
     locationPuck: LocationPuck(
-
+ 
 
         locationPuck3D: LocationPuck3D(
           modelCastShadows: true,
@@ -125,13 +129,16 @@ class _HomeScreenState extends State<HomeScreen> {
             modelUri:
                 "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Embedded/Duck.gltf",)
                 )));
-      mapboxMap.setCamera(
-        CameraOptions(
-          center: Point(coordinates: Position(locationData.longitude!, locationData.latitude!)),
-          zoom: 16.3,
-          pitch: 30,
+      mapboxMap.easeTo(
+      CameraOptions(
+        center: Point(
+          coordinates: Position(locationData.longitude!, locationData.latitude!),
         ),
-      );
+        zoom: 16.3,
+        pitch: 30,
+      ),
+      MapAnimationOptions(duration: 500),
+    );
     }
   }
 
