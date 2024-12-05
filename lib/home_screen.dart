@@ -29,6 +29,8 @@ class _HomeScreenState extends State<HomeScreen> {
   static const String stopsApiUrl = 'https://api.thebus.info/v1/stops';
   static const String stopImageUrl = 'https://s3.qube24.com/cdn/bus_stop.png';
 
+
+  bool isCameraUpdated = false;
   @override
   void dispose() {
     debounceTimer?.cancel();
@@ -149,8 +151,11 @@ class _HomeScreenState extends State<HomeScreen> {
       debounceTimer?.cancel();
       debounceTimer = Timer(const Duration(seconds: 0), () {
         _currentLocation = currentLocation;
-        _updateCamera(currentLocation);
         _getClosestStops(currentLocation);
+        if (!isCameraUpdated) {
+           _updateCamera(currentLocation);
+           isCameraUpdated = true; // Set the flag to true after updating the camera
+    }
       });
     });
   }
