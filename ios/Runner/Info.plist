@@ -43,5 +43,14 @@
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+    <string>Bc of why not!</string>
+	<key>NSLocationTemporaryUsageDescriptionDictionary</key>
+	<dict>
+		<key>LocationAccuracyAuthorizationDescription</key>
+		<string>Please enable precise location. Turn-by-turn directions only work when precise location data is available.</string>
+	</dict>
+	<key>MBXAccessToken</key>
+	<string>sk.eyJ1Ijoic3pvY3NrZTIzIiwiYSI6ImNtNGJlNGkyYjAybHkyanM5cHY5djB6aXQifQ.bOGjr4rYVY-4OpUG5pmJFg</string>
 </dict>
 </plist>
