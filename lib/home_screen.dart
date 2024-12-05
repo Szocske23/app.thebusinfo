@@ -1,8 +1,12 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'routes_screen.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'dart:convert';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -12,70 +16,114 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  MapboxMap? mapboxMap;
+  late MapboxMap mapboxMap;
   final Location location = Location();
   LocationData? _currentLocation;
+  PointAnnotationManager? pointAnnotationManager;
+  List<Map<String, dynamic>> stops = []; // List to hold stops data
 
   // Callback for when the map is created
-  void _onMapCreated(MapboxMap mapboxMap) {
+  void _onMapCreated(MapboxMap mapboxMap) async {
     this.mapboxMap = mapboxMap;
-    _getLocation(); // Fetch the location after the map is ready
+    pointAnnotationManager = await mapboxMap.annotations.createPointAnnotationManager();
+
+    // Initialize location tracking
+    await _initializeLocationTracking();
+
+    // Fetch stops from the API
+    await _fetchStops();
+
+    // Add image annotations for each stop
+    await _addStopAnnotations();
   }
 
-  // Fetch the current location
-  Future<void> _getLocation() async {
-    bool _serviceEnabled;
-    PermissionStatus _permissionGranted;
+  // Fetch the stops data from the API
+  Future<void> _fetchStops() async {
+  try {
+    final response = await http.get(Uri.parse('https://api.thebus.info/v1/stops'));
 
-    // Check if location service is enabled
-    _serviceEnabled = await location.serviceEnabled();
-    if (!_serviceEnabled) {
-      _serviceEnabled = await location.requestService();
-      if (!_serviceEnabled) {
-        print("Location service is not enabled.");
-        return;
+    if (response.statusCode == 200) {
+      // Parse the JSON response body
+      List<dynamic> responseData = json.decode(response.body);
+
+      setState(() {
+        stops = responseData.map((stop) => {
+          "id": stop["id"],
+          "name": stop["name"],
+          "latitude": double.parse(stop["latitude"]),
+          "longitude": double.parse(stop["longitude"]),
+          "route_id": stop["route_id"],
+        }).toList();
+      });
+    } else {
+      print('Failed to fetch stops: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Error fetching stops: $e');
+  }
+}
+
+  // Load the custom image for each stop from URL and add annotations
+  Future<void> _addStopAnnotations() async {
+    for (var stop in stops) {
+      final response = await http.get(Uri.parse('https://s3.qube24.com/cdn/bus_stop.png'));
+
+      if (response.statusCode == 200) {
+        final Uint8List imageData = response.bodyBytes;
+
+        // Create a PointAnnotationOptions for each stop
+        PointAnnotationOptions pointAnnotationOptions = PointAnnotationOptions(
+          geometry: Point(coordinates: Position(stop['longitude'], stop['latitude'])),
+          image: imageData,
+          iconSize: 0.09,
+        );
+
+        // Add the annotation for the stop to the map
+        pointAnnotationManager?.create(pointAnnotationOptions);
+      } else {
+        print('Failed to load image for stop: ${stop['name']}');
       }
     }
+  }
 
-    // Check location permission
-    _permissionGranted = await location.hasPermission();
-    if (_permissionGranted == PermissionStatus.denied) {
-      _permissionGranted = await location.requestPermission();
-      if (_permissionGranted != PermissionStatus.granted) {
-        print("Location permission not granted.");
-        return;
-      }
+  // Initialize location tracking and set up a custom 3D puck
+  Future<void> _initializeLocationTracking() async {
+    bool serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
     }
+    if (!serviceEnabled) return;
 
-    // Get the current location
-    _currentLocation = await location.getLocation();
-    if (_currentLocation != null && mapboxMap != null) {
-      print("Updating map camera...");
-      print(
-          "Location: Latitude = ${_currentLocation!.latitude}, Longitude = ${_currentLocation!.longitude}");
+    PermissionStatus permissionGranted = await location.hasPermission();
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await location.requestPermission();
+    }
+    if (permissionGranted != PermissionStatus.granted) return;
 
-      mapboxMap!.setCamera(
+    // Start listening for location updates
+    location.onLocationChanged.listen((LocationData currentLocation) {
+      _currentLocation = currentLocation;
+      _updateCamera(currentLocation);
+      debugPrint("Current location: ${currentLocation.latitude}, ${currentLocation.longitude}");
+    });
+  }
+
+  // Update the camera position based on current location
+  Future<void> _updateCamera(LocationData locationData) async {
+    final latitude = locationData.latitude;
+    final longitude = locationData.longitude;
+
+    if (latitude != null && longitude != null) {
+      debugPrint("Updating camera to: $latitude, $longitude");
+      mapboxMap.setCamera(
         CameraOptions(
-          center: Point(
-            coordinates: Position(
-              _currentLocation!.longitude!,
-              _currentLocation!.latitude!,
-            ),
-          ),
-          zoom: 15.0,
+          center: Point(coordinates: Position(longitude, latitude)),
+          zoom: 16.3,
+          pitch: 30,
+          padding: MbxEdgeInsets(top: 0, left: 0, bottom: 50, right: 0),
         ),
       );
-    } else {
-      print("MapboxMap is null or location is null.");
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _getLocation();
-    });
   }
 
   @override
@@ -93,8 +141,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   37.33233141, // Default latitude
                 ),
               ),
-              zoom: 17.0,
-              pitch: 40,
+              zoom: 16.3,
+              pitch: 30,
             ),
             styleUri: MapboxStyles.STANDARD,
             textureView: true,
@@ -102,13 +150,13 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           // Custom Floating Bar
           Positioned(
-            bottom: 6,
-            left: 6,
-            right: 6,
+            bottom: 0,
+            left: 0,
+            right: 0,
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Container(
-                height: 65,
+                height: 280,
                 decoration: BoxDecoration(
                   color: Colors.white, // Semi-transparent background
                   borderRadius: BorderRadius.circular(38),
@@ -124,18 +172,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     IconButton(
-                      icon: const FaIcon(
-                        FontAwesomeIcons.solidMap,
+                      icon: const Icon(
+                        FontAwesomeIcons.bus,
                         color: Colors.black,
                         size: 20,
                       ),
                       onPressed: () {
-                        // Action for Home button
+                        // Action for Map button
                       },
                     ),
                     IconButton(
-                      icon: const FaIcon(
-                        FontAwesomeIcons.busSimple,
+                      icon: const Icon(
+                        FontAwesomeIcons.bus,
                         color: Colors.black,
                         size: 20,
                       ),
@@ -150,8 +198,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                     ),
                     IconButton(
-                      icon: const FaIcon(
-                        FontAwesomeIcons.ticket,
+                      icon: const Icon(
+                        FontAwesomeIcons.bus,
                         color: Colors.black,
                         size: 20,
                       ),
@@ -160,8 +208,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                     ),
                     IconButton(
-                      icon: const FaIcon(
-                        FontAwesomeIcons.solidUser,
+                      icon: const Icon(
+                        FontAwesomeIcons.bus,
                         color: Colors.black,
                         size: 20,
                       ),
