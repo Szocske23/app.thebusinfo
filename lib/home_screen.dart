@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
@@ -75,7 +76,14 @@ class _HomeScreenState extends State<HomeScreen> {
         PointAnnotationOptions pointAnnotationOptions = PointAnnotationOptions(
           geometry: Point(coordinates: Position(stop['longitude'], stop['latitude'])),
           image: imageData,
-          iconSize: 0.09,
+          iconSize: 0.3,
+          textField: stop['name'],
+          textOffset: [0.0, -2.0],
+          textColor: Colors.white.value,
+          textHaloBlur: 10,
+          textHaloColor: Colors.black.value,
+          iconOffset: [0.0, -5.0],
+          
         );
 
         // Add the annotation for the stop to the map
@@ -144,22 +152,23 @@ class _HomeScreenState extends State<HomeScreen> {
               zoom: 16.3,
               pitch: 30,
             ),
-            styleUri: MapboxStyles.STANDARD,
+            styleUri: "mapbox://styles/szocske23/cm4brvrj900pb01r1eq8z9spy",
             textureView: true,
             onMapCreated: _onMapCreated,
+
           ),
           // Custom Floating Bar
           Positioned(
             bottom: 0,
             left: 0,
             right: 0,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
+            child: Container(
+              padding: const EdgeInsets.all(10.0),
               child: Container(
-                height: 280,
+                height: 320,
                 decoration: BoxDecoration(
-                  color: Colors.white, // Semi-transparent background
-                  borderRadius: BorderRadius.circular(38),
+                  color: Color.fromARGB(255, 0, 0, 0), // Semi-transparent background
+                  borderRadius: BorderRadius.circular(46),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.2),

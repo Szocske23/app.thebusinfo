@@ -77,7 +77,7 @@ Widget build(BuildContext context) {
           // Add your app logo here
           Image.asset(
             'assets/logo_trsp.png', // Replace with your actual logo asset path
-            width: 300,
+            width: 500,
           ),
           const SizedBox(height: 400),
           const CircularProgressIndicator(
