@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'dart:typed_data';
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -36,7 +37,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _onMapCreated(MapboxMap mapboxMap) async {
     this.mapboxMap = mapboxMap;
-    pointAnnotationManager = await mapboxMap.annotations.createPointAnnotationManager();
+    pointAnnotationManager =
+        await mapboxMap.annotations.createPointAnnotationManager();
 
     await _initializeLocationTracking();
     await _fetchStops();
@@ -67,6 +69,45 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  List<Map<String, dynamic>> _getClosestStops(LocationData currentLocation) {
+    const double earthRadius = 6371; // Radius of the Earth in kilometers
+
+    double calculateDistance(lat1, lon1, lat2, lon2) {
+      double dLat = (lat2 - lat1) * (3.141592653589793 / 180.0);
+      double dLon = (lon2 - lon1) * (3.141592653589793 / 180.0);
+
+      double a = sin(dLat / 2) * sin(dLat / 2) +
+          cos(lat1 * (3.141592653589793 / 180.0)) *
+              cos(lat2 * (3.141592653589793 / 180.0)) *
+              sin(dLon / 2) *
+              sin(dLon / 2);
+      double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+      return earthRadius * c;
+    }
+
+    if (_currentLocation == null) return [];
+
+    // Create a list of stops with the calculated distance
+    List<Map<String, dynamic>> stopsWithDistance = stops
+        .map((stop) => {
+              ...stop,
+              "distance": calculateDistance(
+                currentLocation.latitude!,
+                currentLocation.longitude!,
+                stop['latitude'],
+                stop['longitude'],
+              ),
+            })
+        .where((stop) => stop["distance"] <= 5) // Filter stops within 5km
+        .toList();
+
+    // Sort the stops by distance
+    stopsWithDistance.sort((a, b) => a["distance"].compareTo(b["distance"]));
+
+    // Take the closest 3 stops
+    return stopsWithDistance.take(3).toList();
+  }
+
   Future<void> _addStopAnnotations() async {
     try {
       final response = await http.get(Uri.parse(stopImageUrl));
@@ -74,7 +115,8 @@ class _HomeScreenState extends State<HomeScreen> {
         final Uint8List imageData = response.bodyBytes;
         await Future.wait(stops.map((stop) async {
           final pointAnnotationOptions = PointAnnotationOptions(
-            geometry: Point(coordinates: Position(stop['longitude'], stop['latitude'])),
+            geometry: Point(
+                coordinates: Position(stop['longitude'], stop['latitude'])),
             image: imageData,
             iconSize: 0.3,
             textField: stop['name'],
@@ -99,7 +141,8 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     if (await location.hasPermission() == PermissionStatus.denied) {
-      if (await location.requestPermission() != PermissionStatus.granted) return;
+      if (await location.requestPermission() != PermissionStatus.granted)
+        return;
     }
 
     location.onLocationChanged.listen((LocationData currentLocation) {
@@ -107,6 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
       debounceTimer = Timer(const Duration(seconds: 0), () {
         _currentLocation = currentLocation;
         _updateCamera(currentLocation);
+        _getClosestStops(currentLocation);
       });
     });
   }
@@ -114,38 +158,35 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _updateCamera(LocationData locationData) async {
     if (locationData.latitude != null && locationData.longitude != null) {
       mapboxMap.location.updateSettings(LocationComponentSettings(
-        puckBearingEnabled: true,
-        showAccuracyRing: true,
-        puckBearing: PuckBearing.HEADING,
-        
-    locationPuck: LocationPuck(
- 
-
-        locationPuck3D: LocationPuck3D(
-          modelCastShadows: true,
-          modelScale: [20,17,20],
-          modelReceiveShadows: true,
-          modelEmissiveStrength: 4,
+          puckBearingEnabled: true,
+          showAccuracyRing: true,
+          puckBearing: PuckBearing.HEADING,
+          locationPuck: LocationPuck(
+              locationPuck3D: LocationPuck3D(
+            modelCastShadows: true,
+            modelScale: [20, 17, 20],
+            modelReceiveShadows: true,
+            modelEmissiveStrength: 4,
             modelUri:
-                "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Embedded/Duck.gltf",)
-                )));
-      mapboxMap.easeTo(
-      CameraOptions(
-        center: Point(
-          coordinates: Position(locationData.longitude!, locationData.latitude!),
+                "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Embedded/Duck.gltf",
+          ))));
+      mapboxMap.flyTo(
+        CameraOptions(
+          center: Point(
+            coordinates:
+                Position(locationData.longitude!, locationData.latitude!),
+          ),
+          zoom: 16.3,
+          pitch: 30,
         ),
-        zoom: 16.3,
-        pitch: 30,
-      ),
-      MapAnimationOptions(duration: 500),
-    );
+        MapAnimationOptions(duration: 500),
+      );
     }
   }
 
-
-
   void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -154,7 +195,6 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Stack(
         children: [
           MapWidget(
-            
             key: const ValueKey("mapWidget"),
             cameraOptions: CameraOptions(
               center: Point(
@@ -177,7 +217,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Container(
               padding: const EdgeInsets.all(10.0),
               child: Container(
-                height: 320,
+                height: 280,
                 decoration: BoxDecoration(
                   color: Colors.black,
                   borderRadius: BorderRadius.circular(46),
@@ -189,43 +229,52 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ],
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    IconButton(
-                      icon: const FaIcon(FontAwesomeIcons.map, color: Colors.white, size: 24),
-                      onPressed: () {
-                        // Map button action
-                      },
-                    ),
-                    IconButton(
-                      icon: const FaIcon(FontAwesomeIcons.route, color: Colors.white, size: 24),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const RoutesScreen(),
+                child: _currentLocation == null
+                    ? Center(
+                        child: Text(
+                          'Fetching your location...',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      )
+                    : Column(
+                        children: [
+                          Text(
+                            'Closest Stops:',
+                            style: TextStyle(color: Colors.white, fontSize: 18),
                           ),
-                        );
-                      },
-                    ),
-                    IconButton(
-                      icon: const FaIcon(FontAwesomeIcons.ticket, color: Colors.white, size: 24),
-                      onPressed: () {
-                        // Ticket button action
-                      },
-                    ),
-                    IconButton(
-                      icon: const FaIcon(FontAwesomeIcons.user, color: Colors.white, size: 24),
-                      onPressed: () {
-                        // Profile button action
-                      },
-                    ),
-                  ],
-                ),
+                          const SizedBox(height: 0),
+                          Expanded(
+                            child: ListView.builder(
+                              itemCount:
+                                  _getClosestStops(_currentLocation!).length,
+                              itemBuilder: (context, index) {
+                                final stop =
+                                    _getClosestStops(_currentLocation!)[index];
+                                return ListTile(
+                                  title: Text(
+                                    stop['name'],
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                  subtitle: Text(
+                                    '${stop["distance"].toStringAsFixed(2)} km away',
+                                    style: const TextStyle(color: Colors.grey),
+                                  ),
+                                  trailing: IconButton(
+                                    icon: const Icon(Icons.directions,
+                                        color: Colors.white),
+                                    onPressed: () {
+                                      // Navigate to the stop or show directions
+                                    },
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
               ),
             ),
-          ),
+          )
         ],
       ),
     );
