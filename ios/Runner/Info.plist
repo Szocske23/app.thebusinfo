@@ -15,7 +15,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>app_thebusinfo</string>
+	<string>The Bus Info</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -26,6 +26,15 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>MBXAccessToken</key>
+	<string>sk.eyJ1Ijoic3pvY3NrZTIzIiwiYSI6ImNtNGJlNGkyYjAybHkyanM5cHY5djB6aXQifQ.bOGjr4rYVY-4OpUG5pmJFg</string>
+	<key>NSLocationTemporaryUsageDescriptionDictionary</key>
+	<dict>
+		<key>LocationAccuracyAuthorizationDescription</key>
+		<string>Please enable precise location. Turn-by-turn directions only work when precise location data is available.</string>
+	</dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Bc of why not!</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
@@ -43,14 +52,5 @@
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 	</array>
-	<key>NSLocationWhenInUseUsageDescription</key>
-    <string>Bc of why not!</string>
-	<key>NSLocationTemporaryUsageDescriptionDictionary</key>
-	<dict>
-		<key>LocationAccuracyAuthorizationDescription</key>
-		<string>Please enable precise location. Turn-by-turn directions only work when precise location data is available.</string>
-	</dict>
-	<key>MBXAccessToken</key>
-	<string>sk.eyJ1Ijoic3pvY3NrZTIzIiwiYSI6ImNtNGJlNGkyYjAybHkyanM5cHY5djB6aXQifQ.bOGjr4rYVY-4OpUG5pmJFg</string>
 </dict>
 </plist>
