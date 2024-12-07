@@ -23,12 +23,12 @@ class _HomeScreenState extends State<HomeScreen> {
   LocationData? _currentLocation;
   PointAnnotationManager? pointAnnotationManager;
   List<Map<String, dynamic>> stops = [];
+  List<Map<String, dynamic>> closestStops = [];
   Timer? debounceTimer;
   PointAnnotation? locationIndicator; // Custom location marker
 
   static const String stopsApiUrl = 'https://api.thebus.info/v1/stops';
   static const String stopImageUrl = 'https://s3.qube24.com/cdn/bus_stop.png';
-
 
   bool isCameraUpdated = false;
   @override
@@ -71,44 +71,41 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  List<Map<String, dynamic>> _getClosestStops(LocationData currentLocation) {
-    const double earthRadius = 6371; // Radius of the Earth in kilometers
-
-    double calculateDistance(lat1, lon1, lat2, lon2) {
-      double dLat = (lat2 - lat1) * (3.141592653589793 / 180.0);
-      double dLon = (lon2 - lon1) * (3.141592653589793 / 180.0);
-
-      double a = sin(dLat / 2) * sin(dLat / 2) +
-          cos(lat1 * (3.141592653589793 / 180.0)) *
-              cos(lat2 * (3.141592653589793 / 180.0)) *
-              sin(dLon / 2) *
-              sin(dLon / 2);
-      double c = 2 * atan2(sqrt(a), sqrt(1 - a));
-      return earthRadius * c;
-    }
-
-    if (_currentLocation == null) return [];
-
-    // Create a list of stops with the calculated distance
-    List<Map<String, dynamic>> stopsWithDistance = stops
-        .map((stop) => {
-              ...stop,
-              "distance": calculateDistance(
-                currentLocation.latitude!,
-                currentLocation.longitude!,
-                stop['latitude'],
-                stop['longitude'],
-              ),
-            })
-        .where((stop) => stop["distance"] <= 5) // Filter stops within 5km
-        .toList();
-
-    // Sort the stops by distance
-    stopsWithDistance.sort((a, b) => a["distance"].compareTo(b["distance"]));
-
-    // Take the closest 3 stops
-    return stopsWithDistance.take(3).toList();
+  Future<void> _getClosestStopsFromAPI(LocationData currentLocation) async {
+  if (currentLocation.latitude == null || currentLocation.longitude == null) {
+    _showError('Invalid location data.');
+    return;
   }
+
+  // Correctly append query parameters to the URL
+  final url = Uri.parse(
+    'https://api.thebus.info/v1/stops/closest_stops?latitude=${currentLocation.latitude}&longitude=${currentLocation.longitude}'
+  );
+
+  try {
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      List<dynamic> responseData = json.decode(response.body);
+      setState(() {
+        closestStops = responseData.map((stop) {
+          return {
+            "id": stop["id"],
+            "name": stop["name"],
+            "latitude": double.parse(stop["latitude"]),
+            "longitude": double.parse(stop["longitude"]),
+            "distance": stop["distance"], // Distance provided by the API
+            "services": stop["services"] ?? []
+          };
+        }).toList();
+      });
+    } else {
+      _showError('Failed to fetch closest stops: ${response.statusCode}');
+    }
+  } catch (e) {
+    _showError('Error fetching closest stops: $e');
+  }
+}
 
   Future<void> _addStopAnnotations() async {
     try {
@@ -149,13 +146,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
     location.onLocationChanged.listen((LocationData currentLocation) {
       debounceTimer?.cancel();
-      debounceTimer = Timer(const Duration(seconds: 0), () {
+      debounceTimer = Timer(const Duration(seconds: 0), () async {
         _currentLocation = currentLocation;
-        _getClosestStops(currentLocation);
+        await _getClosestStopsFromAPI(currentLocation);
         if (!isCameraUpdated) {
-           _updateCamera(currentLocation);
-           isCameraUpdated = true; // Set the flag to true after updating the camera
-    }
+          _updateCamera(currentLocation);
+          isCameraUpdated =
+              true; // Set the flag to true after updating the camera
+        }
       });
     });
   }
@@ -165,11 +163,14 @@ class _HomeScreenState extends State<HomeScreen> {
       mapboxMap.location.updateSettings(LocationComponentSettings(
           puckBearingEnabled: true,
           showAccuracyRing: true,
+          accuracyRingBorderColor: Colors.yellow.value,
+          accuracyRingColor: const Color.fromARGB(100, 255, 235, 59).value,
           puckBearing: PuckBearing.HEADING,
           locationPuck: LocationPuck(
               locationPuck3D: LocationPuck3D(
             modelCastShadows: true,
-            modelScale: [20, 17, 20],
+            modelScale: [18, 18, 18],
+            modelRotation: [0, 0, -108],
             modelReceiveShadows: true,
             modelEmissiveStrength: 4,
             modelUri:
@@ -216,72 +217,99 @@ class _HomeScreenState extends State<HomeScreen> {
             onMapCreated: _onMapCreated,
           ),
           Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.all(10.0),
-              child: Container(
-                height: 280,
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.circular(46),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: _currentLocation == null
-                    ? Center(
-                        child: Text(
-                          'Fetching your location...',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      )
-                    : Column(
-                        children: [
-                          Text(
-                            'Closest Stops:',
-                            style: TextStyle(color: Colors.white, fontSize: 18),
-                          ),
-                          const SizedBox(height: 0),
-                          Expanded(
-                            child: ListView.builder(
-                              itemCount:
-                                  _getClosestStops(_currentLocation!).length,
-                              itemBuilder: (context, index) {
-                                final stop =
-                                    _getClosestStops(_currentLocation!)[index];
-                                return ListTile(
-                                  title: Text(
-                                    stop['name'],
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                                  subtitle: Text(
-                                    '${stop["distance"].toStringAsFixed(2)} km away',
-                                    style: const TextStyle(color: Colors.grey),
-                                  ),
-                                  trailing: IconButton(
-                                    icon: const Icon(Icons.directions,
-                                        color: Colors.white),
-                                    onPressed: () {
-                                      // Navigate to the stop or show directions
-                                    },
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
+  bottom: 0,
+  left: 0,
+  right: 0,
+  child: Container(
+    padding: const EdgeInsets.all(10.0),
+    child: Container(
+      height: 280,
+      decoration: BoxDecoration(
+        color: Colors.black,
+        borderRadius: BorderRadius.circular(46),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: stops == null
+          ? Center(
+              child: Text(
+                'Fetching your location...',
+                style: TextStyle(color: Colors.white),
               ),
+            )
+          : Column(
+              children: [
+                Text(
+                  'Closest Stops:',
+                  style: TextStyle(color: Colors.white, fontSize: 18),
+                ),
+                const SizedBox(height: 8),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: closestStops.length,
+                    itemBuilder: (context, index) {
+                      final stop = closestStops[index];
+                      return _buildStopWidget(stop);
+                    },
+                  ),
+                ),
+              ],
             ),
-          )
+    ),
+  ),
+),
         ],
       ),
     );
   }
+}
+
+
+
+
+Widget _buildStopWidget(Map<String, dynamic> stop) {
+  return Card(
+    color: Colors.white,
+    child: Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${stop["name"]}',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 4),
+          Text(
+  'Distance: ${(stop["distance"] ?? 0.0).toStringAsFixed(2)} km',
+  style: TextStyle(fontSize: 14),
+),
+          const SizedBox(height: 8),
+          if (stop["services"] != null && stop["services"].isNotEmpty)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: stop["services"].map<Widget>((service) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 4.0),
+                  child: Text(
+                    service,
+                    style: TextStyle(fontSize: 14, color: Colors.blueGrey),
+                  ),
+                );
+              }).toList(),
+            )
+          else
+            Text(
+              'No services',
+              style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic, color: Colors.grey),
+            ),
+        ],
+      ),
+    ),
+  );
 }
