@@ -182,8 +182,9 @@ class _HomeScreenState extends State<HomeScreen> {
             coordinates:
                 Position(locationData.longitude!, locationData.latitude!),
           ),
-          zoom: 16.3,
-          pitch: 30,
+          zoom: 16,
+          pitch: 34,
+          padding: MbxEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
         ),
         MapAnimationOptions(duration: 500),
       );
@@ -209,8 +210,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   37.33233141, // Default latitude
                 ),
               ),
-              zoom: 16.3,
-              pitch: 30,
+              zoom: 16,
+              pitch: 34,
+              padding: MbxEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
             ),
             styleUri: "mapbox://styles/szocske23/cm4brvrj900pb01r1eq8z9spy",
             textureView: true,
@@ -223,7 +225,7 @@ class _HomeScreenState extends State<HomeScreen> {
   child: Container(
     padding: const EdgeInsets.all(10.0),
     child: Container(
-      height: 280,
+      height: 320,
       decoration: BoxDecoration(
         color: Colors.black,
         borderRadius: BorderRadius.circular(46),
