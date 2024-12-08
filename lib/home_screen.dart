@@ -244,7 +244,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.only(
-                                left: 30, right: 18, bottom: 0, top: 18),
+                                left: 30, right: 18, bottom: 0, top: 15),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               crossAxisAlignment: CrossAxisAlignment.center,
@@ -267,7 +267,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     color: Color.fromARGB(255, 21, 21, 21),
                                     borderRadius: BorderRadius.only(
                                         topLeft: Radius.circular(10),
-                                        topRight: Radius.circular(16),
+                                        topRight: Radius.circular(26),
                                         bottomRight: Radius.circular(10),
                                         bottomLeft: Radius.circular(10)),
                                   ),
@@ -282,7 +282,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ],
                             ),
                           ),
-                          const SizedBox(height: 13),
+                          const SizedBox(height: 15),
                           Column(
                             children: closestStops.asMap().entries.map((entry) {
                               final index = entry.key; // Get index
