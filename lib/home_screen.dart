@@ -24,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> closestStops = [];
   Timer? debounceTimer;
   PointAnnotation? locationIndicator; // Custom location marker
+  
 
   static const String stopsApiUrl = 'https://api.thebus.info/v1/stops';
   static const String stopImageUrl = 'https://s3.qube24.com/cdn/bus_stop.png';
@@ -44,6 +45,8 @@ class _HomeScreenState extends State<HomeScreen> {
     await _fetchStops();
     await _addStopAnnotations();
   }
+
+  
 
   Future<void> _fetchStops() async {
     try {
@@ -195,6 +198,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final Brightness brightnessValue = MediaQuery.of(context).platformBrightness;
+    bool isDark = brightnessValue == Brightness.dark;
     return Scaffold(
       body: Stack(
         children: [
@@ -210,7 +215,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 zoom: 16,
                 pitch: 34,
                 padding: MbxEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)),
-            styleUri: "mapbox://styles/szocske23/cm4brvrj900pb01r1eq8z9spy",
+            styleUri:  isDark 
+            ? "mapbox://styles/szocske23/cm4brvrj900pb01r1eq8z9spy"
+            : "mapbox://styles/szocske23/cm4fsoniy000g01r025ho4kxy",
             textureView: true,
             onMapCreated: _onMapCreated,
           ),
@@ -233,6 +240,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ],
                 ),
+                // ignore: unnecessary_null_comparison
                 child: stops == null
                     ? const Center(
                         child: Text(
@@ -315,13 +323,13 @@ Widget _buildStopCard(Map<String, dynamic> stop, bool isLast) {
   return Card(
     shape: RoundedRectangleBorder(
       borderRadius: isLast
-          ? BorderRadius.only(topLeft: Radius.circular(10),topRight: Radius.circular(10),bottomLeft: Radius.circular(26),bottomRight: Radius.circular(26)) // Larger radius for last card
+          ? const BorderRadius.only(topLeft: Radius.circular(10),topRight: Radius.circular(10),bottomLeft: Radius.circular(26),bottomRight: Radius.circular(26)) // Larger radius for last card
           : BorderRadius.circular(10), // Default smaller radius for others
     ),
     elevation: 4,
-    color: Color.fromARGB(255, 21, 21, 21),
+    color: const Color.fromARGB(255, 21, 21, 21),
     child: Padding(
-      padding: const EdgeInsets.only(left: 6, right: 6, bottom: 6, top: 2),
+      padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10, top: 2),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -345,16 +353,16 @@ Widget _buildStopCard(Map<String, dynamic> stop, bool isLast) {
               Padding(
                 padding: const EdgeInsets.only(right: 2, bottom: 2),
                 child: Text(
-                  '${(stop["distance"] ?? 0.0).toStringAsFixed(2)} km',
+                  '${(stop["distance"]*1000 ?? 0.0).toStringAsFixed(0)} m ',
                   style: const TextStyle(
-                    fontSize: 14,
+                    fontSize: 12,
                     color: Colors.grey,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           if (stop["services"] != null && stop["services"].isNotEmpty)
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -365,13 +373,13 @@ Widget _buildStopCard(Map<String, dynamic> stop, bool isLast) {
                     horizontal: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: Color(0xFFE2861D),
+                    color: const Color(0xFFFF7C0A),
                     borderRadius: isLast
-          ? BorderRadius.only(
+          ? const BorderRadius.only(
                         topLeft: Radius.circular(4),
                         topRight: Radius.circular(4),
                         bottomRight: Radius.circular(4),
-                        bottomLeft: Radius.circular(20)) // Larger radius for last card
+                        bottomLeft: Radius.circular(16)) // Larger radius for last card
           : const BorderRadius.only(
                         topLeft: Radius.circular(4),
                         topRight: Radius.circular(4),
@@ -379,7 +387,7 @@ Widget _buildStopCard(Map<String, dynamic> stop, bool isLast) {
                         bottomLeft: Radius.circular(6)) // Default smaller radius for others
     
                   ),
-                  child: FaIcon(
+                  child: const FaIcon(
                     FontAwesomeIcons.busSimple,
                     size: 10,
                     color: Colors.black,
@@ -391,21 +399,22 @@ Widget _buildStopCard(Map<String, dynamic> stop, bool isLast) {
                     spacing: 4,
                     runSpacing: 4,
                     children: stop["services"].take(3).map<Widget>((service) {
+                      final myServiceColor = hexStringToColor(service['color']);
                       return Container(
                         padding: const EdgeInsets.symmetric(
                           vertical: 4.5,
                           horizontal: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.redAccent,
-                          borderRadius: BorderRadius.only(
+                          color: myServiceColor,
+                          borderRadius: const BorderRadius.only(
                               topLeft: Radius.circular(4),
                               topRight: Radius.circular(4),
                               bottomRight: Radius.circular(4),
                               bottomLeft: Radius.circular(4)),
                         ),
                         child: Text(
-                          service,
+                          service["name"],
                           style: const TextStyle(
                             fontSize: 12,
                             color: Colors.black,
@@ -418,8 +427,8 @@ Widget _buildStopCard(Map<String, dynamic> stop, bool isLast) {
               ],
             )
           else
-            Row(
-              children: const [
+            const Row(
+              children: [
                 Icon(
                   Icons.info_outline,
                   size: 16,
@@ -440,4 +449,14 @@ Widget _buildStopCard(Map<String, dynamic> stop, bool isLast) {
       ),
     ),
   );
+}
+
+Color hexStringToColor(String hexColor) {
+  // Add opacity value if necessary or ensure it's a proper 6-character hex code
+  final buffer = StringBuffer();
+  if (hexColor.length == 6) {
+    buffer.write('FF'); // Default to full opacity
+  }
+  buffer.write(hexColor);
+  return Color(int.parse(buffer.toString(), radix: 16));
 }
