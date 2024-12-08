@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:math';
-import 'dart:typed_data';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -8,7 +6,6 @@ import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/services.dart';
-import 'routes_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -20,6 +17,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late MapboxMap mapboxMap;
   final Location location = Location();
+  // ignore: unused_field
   LocationData? _currentLocation;
   PointAnnotationManager? pointAnnotationManager;
   List<Map<String, dynamic>> stops = [];
@@ -72,40 +70,39 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _getClosestStopsFromAPI(LocationData currentLocation) async {
-  if (currentLocation.latitude == null || currentLocation.longitude == null) {
-    _showError('Invalid location data.');
-    return;
-  }
-
-  // Correctly append query parameters to the URL
-  final url = Uri.parse(
-    'https://api.thebus.info/v1/stops/closest_stops?latitude=${currentLocation.latitude}&longitude=${currentLocation.longitude}'
-  );
-
-  try {
-    final response = await http.get(url);
-
-    if (response.statusCode == 200) {
-      List<dynamic> responseData = json.decode(response.body);
-      setState(() {
-        closestStops = responseData.map((stop) {
-          return {
-            "id": stop["id"],
-            "name": stop["name"],
-            "latitude": double.parse(stop["latitude"]),
-            "longitude": double.parse(stop["longitude"]),
-            "distance": stop["distance"], // Distance provided by the API
-            "services": stop["services"] ?? []
-          };
-        }).toList();
-      });
-    } else {
-      _showError('Failed to fetch closest stops: ${response.statusCode}');
+    if (currentLocation.latitude == null || currentLocation.longitude == null) {
+      _showError('Invalid location data.');
+      return;
     }
-  } catch (e) {
-    _showError('Error fetching closest stops: $e');
+
+    // Correctly append query parameters to the URL
+    final url = Uri.parse(
+        'https://api.thebus.info/v1/stops/closest_stops?latitude=${currentLocation.latitude}&longitude=${currentLocation.longitude}');
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        List<dynamic> responseData = json.decode(response.body);
+        setState(() {
+          closestStops = responseData.map((stop) {
+            return {
+              "id": stop["id"],
+              "name": stop["name"],
+              "latitude": double.parse(stop["latitude"]),
+              "longitude": double.parse(stop["longitude"]),
+              "distance": stop["distance"], // Distance provided by the API
+              "services": stop["services"] ?? []
+            };
+          }).toList();
+        });
+      } else {
+        _showError('Failed to fetch closest stops: ${response.statusCode}');
+      }
+    } catch (e) {
+      _showError('Error fetching closest stops: $e');
+    }
   }
-}
 
   Future<void> _addStopAnnotations() async {
     try {
@@ -140,8 +137,9 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     if (await location.hasPermission() == PermissionStatus.denied) {
-      if (await location.requestPermission() != PermissionStatus.granted)
+      if (await location.requestPermission() != PermissionStatus.granted) {
         return;
+      }
     }
 
     location.onLocationChanged.listen((LocationData currentLocation) {
@@ -178,14 +176,13 @@ class _HomeScreenState extends State<HomeScreen> {
           ))));
       mapboxMap.flyTo(
         CameraOptions(
-          center: Point(
-            coordinates:
-                Position(locationData.longitude!, locationData.latitude!),
-          ),
-          zoom: 16,
-          pitch: 34,
-          padding: MbxEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
-        ),
+            center: Point(
+              coordinates:
+                  Position(locationData.longitude!, locationData.latitude!),
+            ),
+            zoom: 16,
+            pitch: 34,
+            padding: MbxEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)),
         MapAnimationOptions(duration: 500),
       );
     }
@@ -204,111 +201,240 @@ class _HomeScreenState extends State<HomeScreen> {
           MapWidget(
             key: const ValueKey("mapWidget"),
             cameraOptions: CameraOptions(
-              center: Point(
-                coordinates: Position(
-                  -122.0312186, // Default longitude
-                  37.33233141, // Default latitude
+                center: Point(
+                  coordinates: Position(
+                    -122.0312186, // Default longitude
+                    37.33233141, // Default latitude
+                  ),
                 ),
-              ),
-              zoom: 16,
-              pitch: 34,
-              padding: MbxEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
-            ),
+                zoom: 16,
+                pitch: 34,
+                padding: MbxEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)),
             styleUri: "mapbox://styles/szocske23/cm4brvrj900pb01r1eq8z9spy",
             textureView: true,
             onMapCreated: _onMapCreated,
           ),
           Positioned(
-  bottom: 0,
-  left: 0,
-  right: 0,
-  child: Container(
-    padding: const EdgeInsets.all(10.0),
-    child: Container(
-      height: 320,
-      decoration: BoxDecoration(
-        color: Colors.black,
-        borderRadius: BorderRadius.circular(46),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: stops == null
-          ? Center(
-              child: Text(
-                'Fetching your location...',
-                style: TextStyle(color: Colors.white),
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              padding: const EdgeInsets.all(10.0),
+              child: Container(
+                height: 340,
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(46),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: stops == null
+                    ? const Center(
+                        child: Text(
+                          'Fetching your location...',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      )
+                    : Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(
+                                left: 30, right: 18, bottom: 0, top: 18),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                const Text(
+                                  'Stops Near',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color.fromARGB(221, 255, 255, 255),
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 8,
+                                    horizontal: 12,
+                                  ),
+                                  decoration: const BoxDecoration(
+                                    color: Color.fromARGB(255, 21, 21, 21),
+                                    borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(10),
+                                        topRight: Radius.circular(16),
+                                        bottomRight: Radius.circular(10),
+                                        bottomLeft: Radius.circular(10)),
+                                  ),
+                                  child: const Text(
+                                    'All routes',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 13),
+                          Column(
+                            children: closestStops.asMap().entries.map((entry) {
+                              final index = entry.key; // Get index
+                              final stop = entry.value; // Get stop
+                              final isLast = index ==
+                                  closestStops.length -
+                                      1; // Check if it's the last card
+                              return Padding(
+                                padding: const EdgeInsets.only(
+                                  bottom: 2,
+                                  left: 15,
+                                  right: 15,
+                                ),
+                                child: _buildStopCard(stop, isLast),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
               ),
-            )
-          : Column(
-              children: [
-                Text(
-                  'Closest Stops:',
-                  style: TextStyle(color: Colors.white, fontSize: 18),
-                ),
-                const SizedBox(height: 8),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: closestStops.length,
-                    itemBuilder: (context, index) {
-                      final stop = closestStops[index];
-                      return _buildStopWidget(stop);
-                    },
-                  ),
-                ),
-              ],
             ),
-    ),
-  ),
-),
+          ),
         ],
       ),
     );
   }
 }
 
-
-
-
-Widget _buildStopWidget(Map<String, dynamic> stop) {
+Widget _buildStopCard(Map<String, dynamic> stop, bool isLast) {
   return Card(
-    color: Colors.white,
+    shape: RoundedRectangleBorder(
+      borderRadius: isLast
+          ? BorderRadius.only(topLeft: Radius.circular(10),topRight: Radius.circular(10),bottomLeft: Radius.circular(26),bottomRight: Radius.circular(26)) // Larger radius for last card
+          : BorderRadius.circular(10), // Default smaller radius for others
+    ),
+    elevation: 4,
+    color: Color.fromARGB(255, 21, 21, 21),
     child: Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.only(left: 6, right: 6, bottom: 6, top: 2),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '${stop["name"]}',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 4),
-          Text(
-  'Distance: ${(stop["distance"] ?? 0.0).toStringAsFixed(2)} km',
-  style: TextStyle(fontSize: 14),
-),
-          const SizedBox(height: 8),
-          if (stop["services"] != null && stop["services"].isNotEmpty)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: stop["services"].map<Widget>((service) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 4.0),
-                  child: Text(
-                    service,
-                    style: TextStyle(fontSize: 14, color: Colors.blueGrey),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 2, top: 4),
+                child: Text(
+                  '${stop["name"]}',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color.fromARGB(221, 255, 255, 255),
                   ),
-                );
-              }).toList(),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Padding(
+                padding: const EdgeInsets.only(right: 2, bottom: 2),
+                child: Text(
+                  '${(stop["distance"] ?? 0.0).toStringAsFixed(2)} km',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (stop["services"] != null && stop["services"].isNotEmpty)
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Color(0xFFE2861D),
+                    borderRadius: isLast
+          ? BorderRadius.only(
+                        topLeft: Radius.circular(4),
+                        topRight: Radius.circular(4),
+                        bottomRight: Radius.circular(4),
+                        bottomLeft: Radius.circular(20)) // Larger radius for last card
+          : const BorderRadius.only(
+                        topLeft: Radius.circular(4),
+                        topRight: Radius.circular(4),
+                        bottomRight: Radius.circular(4),
+                        bottomLeft: Radius.circular(6)) // Default smaller radius for others
+    
+                  ),
+                  child: FaIcon(
+                    FontAwesomeIcons.busSimple,
+                    size: 10,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Wrap(
+                    spacing: 4,
+                    runSpacing: 4,
+                    children: stop["services"].take(3).map<Widget>((service) {
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 4.5,
+                          horizontal: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.redAccent,
+                          borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(4),
+                              topRight: Radius.circular(4),
+                              bottomRight: Radius.circular(4),
+                              bottomLeft: Radius.circular(4)),
+                        ),
+                        child: Text(
+                          service,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.black,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
             )
           else
-            Text(
-              'No services',
-              style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic, color: Colors.grey),
+            Row(
+              children: const [
+                Icon(
+                  Icons.info_outline,
+                  size: 16,
+                  color: Colors.grey,
+                ),
+                SizedBox(width: 8),
+                Text(
+                  'No services available',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
             ),
         ],
       ),
