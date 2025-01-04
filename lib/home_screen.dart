@@ -38,12 +38,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _onMapCreated(MapboxMap mapboxMap) async {
     this.mapboxMap = mapboxMap;
+    
     pointAnnotationManager =
         await mapboxMap.annotations.createPointAnnotationManager();
 
     await _initializeLocationTracking();
     await _fetchStops();
-    await _addStopAnnotations();
+    // await _addStopsAsLayer();
+    await _addStopClusters();
   }
 
   
@@ -106,33 +108,63 @@ class _HomeScreenState extends State<HomeScreen> {
       _showError('Error fetching closest stops: $e');
     }
   }
+ 
+Future<void> _addStopClusters() async {
+  try {
+    // Prepare GeoJSON data for stops
+    final stopsGeoJson = {
+      "type": "FeatureCollection",
+      "features": stops.map((stop) {
+        return {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [stop['longitude'], stop['latitude']],
+          },
+          "properties": {
+            "name": stop['name'],
+          },
+        };
+      }).toList(),
+    };
 
-  Future<void> _addStopAnnotations() async {
-    try {
-      final response = await http.get(Uri.parse(stopImageUrl));
-      if (response.statusCode == 200) {
-        final Uint8List imageData = response.bodyBytes;
-        await Future.wait(stops.map((stop) async {
-          final pointAnnotationOptions = PointAnnotationOptions(
-            geometry: Point(
-                coordinates: Position(stop['longitude'], stop['latitude'])),
-            image: imageData,
-            iconSize: 0.3,
-            textField: stop['name'],
-            textOffset: [0.0, -2.0],
-            textColor: Colors.white.value,
-            textHaloBlur: 10,
-            textHaloColor: Colors.black.value,
-          );
-          await pointAnnotationManager?.create(pointAnnotationOptions);
-        }));
-      } else {
-        _showError('Failed to load stop image.');
-      }
-    } catch (e) {
-      _showError('Error loading stop annotations: $e');
-    }
+    // Add GeoJSON source with clustering enabled
+    await mapboxMap.style.addSource(GeoJsonSource(
+      id: 'stop-cluster-source', // Source ID
+      data: json.encode(stopsGeoJson),
+      cluster: true,
+      clusterRadius: 50, // Radius for clustering
+      clusterMaxZoom: 14, // Maximum zoom to cluster points
+    ));
+
+    // Add a layer for clusters
+    await mapboxMap.style.addLayer(SymbolLayer(
+      id: 'cluster-layer',
+      sourceId: 'stop-cluster-source',
+      filter: ['has', 'point_count'],
+      iconImage: 'mapbox-bus',
+      iconSize: 1.0,
+      textField: '{point_count}',
+      textOffset: [0.0, 0.0],
+      textSize: 12,
+
+    ));
+
+    // Add a layer for individual points (non-clustered)
+    await mapboxMap.style.addLayer(SymbolLayer(
+      id: 'stop-layer',
+      sourceId: 'stop-cluster-source',
+      filter: ['!', ['has', 'point_count']],
+      iconImage: "mapbox-bus",
+      iconSize: 0.5,
+      textField: '{name}',
+      textOffset: [0.0, -2.0],
+      
+    ));
+  } catch (e) {
+    _showError('Error adding stop clusters: $e');
   }
+}
 
   Future<void> _initializeLocationTracking() async {
     if (!await location.serviceEnabled()) {
@@ -164,7 +196,7 @@ class _HomeScreenState extends State<HomeScreen> {
       mapboxMap.location.updateSettings(LocationComponentSettings(
           puckBearingEnabled: true,
           showAccuracyRing: true,
-          accuracyRingBorderColor: Colors.yellow.value,
+          accuracyRingBorderColor: Color.fromARGB(255, 0, 21, 255).value,
           accuracyRingColor: const Color.fromARGB(100, 255, 235, 59).value,
           puckBearing: PuckBearing.HEADING,
           locationPuck: LocationPuck(
@@ -215,6 +247,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 zoom: 16,
                 pitch: 34,
                 padding: MbxEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)),
+
             styleUri:  isDark 
             ? "mapbox://styles/szocske23/cm4brvrj900pb01r1eq8z9spy"
             : "mapbox://styles/szocske23/cm4fsoniy000g01r025ho4kxy",
@@ -280,7 +313,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         bottomLeft: Radius.circular(10)),
                                   ),
                                   child: const Text(
-                                    'All routes',
+                                    'My Tickets',
                                     style: TextStyle(
                                       fontSize: 16,
                                       color: Colors.white,
@@ -460,3 +493,6 @@ Color hexStringToColor(String hexColor) {
   buffer.write(hexColor);
   return Color(int.parse(buffer.toString(), radix: 16));
 }
+
+
+
