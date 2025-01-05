@@ -28,7 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   static const String stopsApiUrl = 'https://api.thebus.info/v1/stops';
   static const String stopImageUrl = 'https://s3.qube24.com/cdn/bus_stop.png';
-
+  
   bool isCameraUpdated = false;
   @override
   void dispose() {
@@ -42,12 +42,18 @@ class _HomeScreenState extends State<HomeScreen> {
     pointAnnotationManager =
         await mapboxMap.annotations.createPointAnnotationManager();
 
+     
+
     await _initializeLocationTracking();
     await _fetchStops();
+  
     // await _addStopsAsLayer();
     await _addStopClusters();
   }
 
+  late Uint8List imageData;
+
+ 
   
 
   Future<void> _fetchStops() async {
@@ -133,8 +139,8 @@ Future<void> _addStopClusters() async {
       id: 'stop-cluster-source', // Source ID
       data: json.encode(stopsGeoJson),
       cluster: true,
-      clusterRadius: 50, // Radius for clustering
-      clusterMaxZoom: 14, // Maximum zoom to cluster points
+      clusterRadius: 60, // Radius for clustering
+      clusterMaxZoom: 14.8, // Maximum zoom to cluster points
     ));
 
     // Add a layer for clusters
@@ -142,11 +148,11 @@ Future<void> _addStopClusters() async {
       id: 'cluster-layer',
       sourceId: 'stop-cluster-source',
       filter: ['has', 'point_count'],
-      iconImage: 'mapbox-bus',
-      iconSize: 1.0,
+      iconImage: "bus-cluster",
+      iconSize: 0.1,
       textField: '{point_count}',
       textOffset: [0.0, 0.0],
-      textSize: 12,
+      textSize: 14,
 
     ));
 
@@ -155,10 +161,13 @@ Future<void> _addStopClusters() async {
       id: 'stop-layer',
       sourceId: 'stop-cluster-source',
       filter: ['!', ['has', 'point_count']],
-      iconImage: "mapbox-bus",
-      iconSize: 0.5,
+      iconImage: "bus-stop",
+      iconAnchor: IconAnchor.BOTTOM,
+      iconSize: 0.08,
       textField: '{name}',
-      textOffset: [0.0, -2.0],
+      textOffset: [0.0, 1.2],
+      textColor: const Color(0xFFFFFFFF).value,
+      textSize: 10,
       
     ));
   } catch (e) {
