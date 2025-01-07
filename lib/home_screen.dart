@@ -49,6 +49,9 @@ class _HomeScreenState extends State<HomeScreen> {
   
     // await _addStopsAsLayer();
     await _addStopClusters();
+    
+
+    
   }
 
   late Uint8List imageData;
@@ -116,6 +119,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
  
 Future<void> _addStopClusters() async {
+  final Brightness brightnessValue = MediaQuery.of(context).platformBrightness;
+    bool isDark = brightnessValue == Brightness.dark;
   try {
     // Prepare GeoJSON data for stops
     final stopsGeoJson = {
@@ -139,8 +144,9 @@ Future<void> _addStopClusters() async {
       id: 'stop-cluster-source', // Source ID
       data: json.encode(stopsGeoJson),
       cluster: true,
-      clusterRadius: 60, // Radius for clustering
-      clusterMaxZoom: 14.8, // Maximum zoom to cluster points
+      clusterRadius: 50, // Radius for clustering
+      clusterMaxZoom: 14.6, // Maximum zoom to cluster points
+      tolerance: 0.0, // Tolerance for clustering
     ));
 
     // Add a layer for clusters
@@ -149,10 +155,14 @@ Future<void> _addStopClusters() async {
       sourceId: 'stop-cluster-source',
       filter: ['has', 'point_count'],
       iconImage: "bus-cluster",
-      iconSize: 0.1,
+      iconSize: 0.12,
       textField: '{point_count}',
       textOffset: [0.0, 0.0],
-      textSize: 14,
+      textSize: 16,
+      textMaxWidth: 20,
+      iconAllowOverlap: true,
+      textColor:const Color(0xFFE2861D).value,
+
 
     ));
 
@@ -166,9 +176,11 @@ Future<void> _addStopClusters() async {
       iconSize: 0.08,
       textField: '{name}',
       textOffset: [0.0, 1.2],
-      textColor: const Color(0xFFFFFFFF).value,
+      textColor: isDark  ?const Color(0xFFFFFFFF).value :const Color(0xFF000000).value,
       textSize: 10,
-      
+      iconKeepUpright: true ,  
+      iconAllowOverlap: true,
+
     ));
   } catch (e) {
     _showError('Error adding stop clusters: $e');
@@ -261,6 +273,7 @@ Future<void> _addStopClusters() async {
             ? "mapbox://styles/szocske23/cm4brvrj900pb01r1eq8z9spy"
             : "mapbox://styles/szocske23/cm4fsoniy000g01r025ho4kxy",
             textureView: true,
+
             onMapCreated: _onMapCreated,
           ),
           Positioned(
