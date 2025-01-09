@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:location/location.dart';
@@ -277,231 +278,220 @@ Future<void> _addStopClusters() async {
             onMapCreated: _onMapCreated,
           ),
           Positioned(
-            bottom: 0,
+            bottom: 20,
             left: 0,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.all(10.0),
+            right: 70,
+            child: Container( padding: const EdgeInsets.all(10.0),
               child: Container(
-                height: 340,
+                height: 60,
                 decoration: BoxDecoration(
                   color: Colors.black,
-                  borderRadius: BorderRadius.circular(46),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+                  borderRadius: BorderRadius.circular(25),
                 ),
-                // ignore: unnecessary_null_comparison
-                child: stops == null
-                    ? const Center(
-                        child: Text(
-                          'Fetching your location...',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      )
-                    : Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(
-                                left: 30, right: 18, bottom: 0, top: 15),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                const Text(
-                                  'Stops Near',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color.fromARGB(221, 255, 255, 255),
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 8,
-                                    horizontal: 12,
-                                  ),
-                                  decoration: const BoxDecoration(
-                                    color: Color.fromARGB(255, 21, 21, 21),
-                                    borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(10),
-                                        topRight: Radius.circular(26),
-                                        bottomRight: Radius.circular(10),
-                                        bottomLeft: Radius.circular(10)),
-                                  ),
-                                  child: const Text(
-                                    'My Tickets',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 15),
-                          Column(
-                            children: closestStops.asMap().entries.map((entry) {
-                              final index = entry.key; // Get index
-                              final stop = entry.value; // Get stop
-                              final isLast = index ==
-                                  closestStops.length -
-                                      1; // Check if it's the last card
-                              return Padding(
-                                padding: const EdgeInsets.only(
-                                  bottom: 2,
-                                  left: 15,
-                                  right: 15,
-                                ),
-                                child: _buildStopCard(stop, isLast),
-                              );
-                            }).toList(),
-                          ),
-                        ],
-                      ),
-              ),
+                child: Row(
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(left: 15),
+          child: const Center(
+                  child: FaIcon(
+                  FontAwesomeIcons.mapLocationDot,
+                  size: 20,
+                  color: Colors.white,
+                  ),
+                ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: TextField(
+            style: const TextStyle(color: Colors.white),
+            decoration: InputDecoration(
+              hintText: 'Search for destination...',
+              hintStyle: const TextStyle(color: Colors.grey),
+              border: InputBorder.none,
             ),
+            onChanged: (value) {
+              // Handle search query updates
+              print('Search query: $value');
+            },
           ),
+        ),
+        IconButton(
+          onPressed: () {
+            // Add logic for clearing the search or submitting it
+            print('Search icon pressed');
+          },
+          icon: const FaIcon(
+                  FontAwesomeIcons.magnifyingGlass,
+                  size: 20,
+                  color: Colors.white,
+                  ),
+        ),
+      ],
+    ),
+                )
+                )
+          ),
+          Positioned(
+            bottom: 20,
+            right: 0,
+            child: Container( padding: const EdgeInsets.all(10.0),
+              child: Container(
+                height: 60,
+                width: 60,
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: const Center(
+                  child: FaIcon(
+                  FontAwesomeIcons.qrcode,
+                  size: 25,
+                  color: Colors.white,
+                  ),
+                ),
+                ),
+                )
+          ),
+          Positioned(
+  bottom: 100,
+  left: 0,
+  right: 0,
+  child: SizedBox(
+    height: 90,
+    child: stops == null
+        ? const Center(
+            child: Text(
+              'Fetching your location...',
+              style: TextStyle(color: Colors.white),
+            ),
+          )
+        : PageView.builder(
+            itemCount: closestStops.length,
+            controller: PageController(viewportFraction: 0.9),
+            itemBuilder: (context, index) {
+              final stop = closestStops[index];
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 5),
+                child: _buildStopView(stop),
+              );
+            },
+          ),
+  ),
+),
         ],
       ),
     );
   }
 }
 
-Widget _buildStopCard(Map<String, dynamic> stop, bool isLast) {
-  return Card(
-    shape: RoundedRectangleBorder(
-      borderRadius: isLast
-          ? const BorderRadius.only(topLeft: Radius.circular(10),topRight: Radius.circular(10),bottomLeft: Radius.circular(26),bottomRight: Radius.circular(26)) // Larger radius for last card
-          : BorderRadius.circular(10), // Default smaller radius for others
+Widget _buildStopView(Map<String, dynamic> stop) {
+  return Container(
+    decoration: BoxDecoration(
+      color: Colors.black,
+      borderRadius: BorderRadius.circular(25),
     ),
-    elevation: 4,
-    color: const Color.fromARGB(255, 21, 21, 21),
-    child: Padding(
-      padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10, top: 2),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    padding: const EdgeInsets.only(left: 15, top: 15, right: 15, bottom: 10),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Text(
+              '${stop["name"]}',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(width: 16,),
+            Text(
+              '${(stop["distance"] * 1000 ?? 0.0).toStringAsFixed(0)} m',
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                color: Colors.grey,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        if (stop["services"] != null && stop["services"].isNotEmpty)
           Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 2, top: 4),
-                child: Text(
-                  '${stop["name"]}',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(221, 255, 255, 255),
+              Container(
+                height: 28,
+                padding: const EdgeInsets.all(5),
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFF7C0A),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(6),
+                    bottomRight: Radius.circular(4),
+                    bottomLeft: Radius.circular(10),
+                    topRight: Radius.circular(4),
                   ),
-                  overflow: TextOverflow.ellipsis,
+                ),
+                child: const Icon(
+                  Icons.directions_bus,
+                  size: 15,
+                  color: Colors.black,
                 ),
               ),
-              const SizedBox(width: 12),
-              Padding(
-                padding: const EdgeInsets.only(right: 2, bottom: 2),
-                child: Text(
-                  '${(stop["distance"]*1000 ?? 0.0).toStringAsFixed(0)} m ',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                  ),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Wrap(
+                  spacing: 4,
+                  runSpacing: 4,
+                  children: stop["services"].take(3).map<Widget>((service) {
+                    final myServiceColor = hexStringToColor(service['color']);
+                    return Container(
+                      height: 28,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 4.5,
+                        horizontal: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: myServiceColor,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        service["name"],
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          )
+        else
+          const Row(
+            children: [
+              Icon(
+                Icons.info_outline,
+                size: 16,
+                color: Colors.grey,
+              ),
+              SizedBox(width: 8),
+              Text(
+                'No services available',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontStyle: FontStyle.italic,
+                  color: Colors.grey,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          if (stop["services"] != null && stop["services"].isNotEmpty)
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 8,
-                    horizontal: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFF7C0A),
-                    borderRadius: isLast
-          ? const BorderRadius.only(
-                        topLeft: Radius.circular(4),
-                        topRight: Radius.circular(4),
-                        bottomRight: Radius.circular(4),
-                        bottomLeft: Radius.circular(16)) // Larger radius for last card
-          : const BorderRadius.only(
-                        topLeft: Radius.circular(4),
-                        topRight: Radius.circular(4),
-                        bottomRight: Radius.circular(4),
-                        bottomLeft: Radius.circular(6)) // Default smaller radius for others
-    
-                  ),
-                  child: const FaIcon(
-                    FontAwesomeIcons.busSimple,
-                    size: 10,
-                    color: Colors.black,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Wrap(
-                    spacing: 4,
-                    runSpacing: 4,
-                    children: stop["services"].take(3).map<Widget>((service) {
-                      final myServiceColor = hexStringToColor(service['color']);
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 4.5,
-                          horizontal: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: myServiceColor,
-                          borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(4),
-                              topRight: Radius.circular(4),
-                              bottomRight: Radius.circular(4),
-                              bottomLeft: Radius.circular(4)),
-                        ),
-                        child: Text(
-                          service["name"],
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.black,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ],
-            )
-          else
-            const Row(
-              children: [
-                Icon(
-                  Icons.info_outline,
-                  size: 16,
-                  color: Colors.grey,
-                ),
-                SizedBox(width: 8),
-                Text(
-                  'No services available',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontStyle: FontStyle.italic,
-                    color: Colors.grey,
-                  ),
-                ),
-              ],
-            ),
-        ],
-      ),
+      ],
     ),
   );
 }
