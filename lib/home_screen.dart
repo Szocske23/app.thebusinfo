@@ -7,6 +7,7 @@ import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/services.dart';
+import 'stop_details_page.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -28,7 +29,6 @@ class _HomeScreenState extends State<HomeScreen> {
   
 
   static const String stopsApiUrl = 'https://api.thebus.info/v1/stops';
-  static const String stopImageUrl = 'https://s3.qube24.com/cdn/bus_stop.png';
   
   bool isCameraUpdated = false;
   @override
@@ -107,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
               "latitude": double.parse(stop["latitude"]),
               "longitude": double.parse(stop["longitude"]),
               "distance": stop["distance"], // Distance provided by the API
-              "services": stop["services"] ?? []
+              "routes": stop["routes"] ?? [] // Map the routes correctly
             };
           }).toList();
         });
@@ -262,12 +262,12 @@ Future<void> _addStopClusters() async {
             cameraOptions: CameraOptions(
                 center: Point(
                   coordinates: Position(
-                    -122.0312186, // Default longitude
-                    37.33233141, // Default latitude
+                    24.9668, // Default longitude
+                    45.9432, // Default latitude
                   ),
                 ),
-                zoom: 16,
-                pitch: 34,
+                zoom: 4.9,
+                
                 padding: MbxEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)),
 
             styleUri:  isDark 
@@ -287,6 +287,14 @@ Future<void> _addStopClusters() async {
                 decoration: BoxDecoration(
                   color: Colors.black,
                   borderRadius: BorderRadius.circular(25),
+                  boxShadow: const [
+                            BoxShadow(
+                              color: Color(0x20e2861d),
+                              spreadRadius: 2,
+                              blurRadius: 20,
+                              offset: Offset(0, 0),
+                            ),
+                          ],
                 ),
                 child: Row(
       children: [
@@ -304,9 +312,9 @@ Future<void> _addStopClusters() async {
         Expanded(
           child: TextField(
             style: const TextStyle(color: Colors.white),
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               hintText: 'Search for destination...',
-              hintStyle: const TextStyle(color: Colors.grey),
+              hintStyle: TextStyle(color: Colors.grey),
               border: InputBorder.none,
             ),
             onChanged: (value) {
@@ -341,6 +349,14 @@ Future<void> _addStopClusters() async {
                 decoration: BoxDecoration(
                   color: Colors.black,
                   borderRadius: BorderRadius.circular(25),
+                  boxShadow: const [
+                            BoxShadow(
+                              color: Color(0x20e2861d),
+                              spreadRadius: 2,
+                              blurRadius: 20,
+                              offset: Offset(0, 0),
+                            ),
+                          ],
                 ),
                 child: const Center(
                   child: FaIcon(
@@ -358,21 +374,14 @@ Future<void> _addStopClusters() async {
   right: 0,
   child: SizedBox(
     height: 90,
-    child: stops == null
-        ? const Center(
-            child: Text(
-              'Fetching your location...',
-              style: TextStyle(color: Colors.white),
-            ),
-          )
-        : PageView.builder(
+    child: PageView.builder(
             itemCount: closestStops.length,
             controller: PageController(viewportFraction: 0.9),
             itemBuilder: (context, index) {
               final stop = closestStops[index];
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 5),
-                child: _buildStopView(stop),
+                child: _buildStopView(context, stop),
               );
             },
           ),
@@ -384,115 +393,138 @@ Future<void> _addStopClusters() async {
   }
 }
 
-Widget _buildStopView(Map<String, dynamic> stop) {
-  return Container(
-    decoration: BoxDecoration(
-      color: Colors.black,
-      borderRadius: BorderRadius.circular(25),
-    ),
-    padding: const EdgeInsets.only(left: 15, top: 15, right: 15, bottom: 10),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Text(
-              '${stop["name"]}',
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-              overflow: TextOverflow.ellipsis,
+Widget _buildStopView(BuildContext context, Map<String, dynamic> stop) {
+  return GestureDetector(
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => StopDetailsPage(stopId: stop['id']),
+      ),
+    );
+  },
+  child: Container(
+  decoration: BoxDecoration(
+    color: Colors.black,
+    borderRadius: BorderRadius.circular(25),
+    boxShadow: const [
+      BoxShadow(
+        color: Color(0x20e2861d),
+        spreadRadius: 2,
+        blurRadius: 20,
+        offset: Offset(0, 0),
+      ),
+    ],
+  ),
+  padding: const EdgeInsets.only(left: 15, top: 15, right: 15, bottom: 10),
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Text(
+            '${stop["name"]}',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
-            const SizedBox(width: 16,),
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(width: 16),
+          Text(
+            '${(stop["distance"] * 1000).toStringAsFixed(0)} m',
+             // ignore: avoid_print
+          
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              color: Colors.grey,
+            ),
+          ),
+        ],
+      ),
+      
+      const SizedBox(height: 8),
+      if (stop["routes"] != null && stop["routes"].isNotEmpty)
+      
+        Row(
+          children: [
+            Container(
+              height: 28,
+              padding: const EdgeInsets.all(5),
+              decoration: const BoxDecoration(
+                color: Color(0xFFFF7C0A),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(6),
+                  bottomRight: Radius.circular(4),
+                  bottomLeft: Radius.circular(10),
+                  topRight: Radius.circular(4),
+                ),
+              ),
+              child: const Icon(
+                Icons.directions_bus,
+                size: 15,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Expanded(
+              child: Wrap(
+                spacing: 4,
+                runSpacing: 4,
+                
+                children: stop["routes"].take(3).map<Widget>((route) {
+                  print(stop);
+                  return Container(
+                    height: 28,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 4.5,
+                      horizontal: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE2861D), // Fixed color for routes
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      route["name"],
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black,
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        )
+      else
+        const Row(
+          children: [
+            Icon(
+              Icons.info_outline,
+              size: 16,
+              color: Colors.grey,
+            ),
+            SizedBox(width: 8),
             Text(
-              '${(stop["distance"] * 1000 ?? 0.0).toStringAsFixed(0)} m',
-              style: const TextStyle(
+              'No routes available',
+              style: TextStyle(
                 fontSize: 12,
-                fontWeight: FontWeight.w800,
+                fontStyle: FontStyle.italic,
                 color: Colors.grey,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 8),
-        if (stop["services"] != null && stop["services"].isNotEmpty)
-          Row(
-            children: [
-              Container(
-                height: 28,
-                padding: const EdgeInsets.all(5),
-                decoration: const BoxDecoration(
-                  color: Color(0xFFFF7C0A),
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(6),
-                    bottomRight: Radius.circular(4),
-                    bottomLeft: Radius.circular(10),
-                    topRight: Radius.circular(4),
-                  ),
-                ),
-                child: const Icon(
-                  Icons.directions_bus,
-                  size: 15,
-                  color: Colors.black,
-                ),
-              ),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Wrap(
-                  spacing: 4,
-                  runSpacing: 4,
-                  children: stop["services"].take(3).map<Widget>((service) {
-                    final myServiceColor = hexStringToColor(service['color']);
-                    return Container(
-                      height: 28,
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 4.5,
-                        horizontal: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: myServiceColor,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        service["name"],
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ],
-          )
-        else
-          const Row(
-            children: [
-              Icon(
-                Icons.info_outline,
-                size: 16,
-                color: Colors.grey,
-              ),
-              SizedBox(width: 8),
-              Text(
-                'No services available',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontStyle: FontStyle.italic,
-                  color: Colors.grey,
-                ),
-              ),
-            ],
-          ),
-      ],
-    ),
+    ],
+  ),
+),
   );
 }
 
