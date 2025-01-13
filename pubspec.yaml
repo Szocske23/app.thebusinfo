@@ -39,6 +39,7 @@ dependencies:
   font_awesome_flutter: ^10.8.0
   mapbox_maps_flutter: ^2.5.0
   location: ^7.0.1
+  flutter_secure_storage: ^9.2.4
 
 dev_dependencies:
   flutter_test:

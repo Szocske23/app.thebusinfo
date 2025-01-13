@@ -8,12 +8,78 @@ import 'package:location/location.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/services.dart';
 import 'stop_details_page.dart';
+import 'tickets_page.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'signin_page.dart';
+
+
+
+Future<bool> validateToken() async {
+  final tokens = await AuthStorage.getTokens();
+
+  if (tokens['access-token'] == null ||
+      tokens['client'] == null ||
+      tokens['uid'] == null ||
+      tokens['authorization'] == null) {
+    return false;
+  }
+
+  final response = await http.get(
+    Uri.parse('https://api.thebus.info/auth/validate_token'),
+    headers: {
+      'Authorization': 'Bearer ${tokens['authorization']}',
+      'access-token': tokens['access-token']!,
+      'client': tokens['client']!,
+      'uid': tokens['uid']!,
+    },
+  );
+
+  if (response.statusCode == 200) {
+    return true;
+  } else {
+    return false;
+  }
+}
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
+}
+
+
+class AuthStorage {
+  static final _storage = const FlutterSecureStorage();
+
+  static Future<void> saveTokens({
+    required String accessToken,
+    required String client,
+    required String uid,
+    required String authorization,
+  }) async {
+    await _storage.write(key: 'access-token', value: accessToken);
+    await _storage.write(key: 'client', value: client);
+    await _storage.write(key: 'uid', value: uid);
+    await _storage.write(key: 'authorization', value: authorization);
+  }
+
+  static Future<Map<String, String?>> getTokens() async {
+    final accessToken = await _storage.read(key: 'access-token');
+    final client = await _storage.read(key: 'client');
+    final uid = await _storage.read(key: 'uid');
+    final authorization = await _storage.read(key: 'authorization');
+    return {
+      'access-token': accessToken,
+      'client': client,
+      'uid': uid,
+      'authorization': authorization,
+    };
+  }
+
+  static Future<void> clearTokens() async {
+    await _storage.deleteAll();
+  }
 }
 
 class _HomeScreenState extends State<HomeScreen> {
@@ -331,34 +397,53 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ))),
           Positioned(
-              bottom: 20,
-              right: 0,
-              child: Container(
-                padding: const EdgeInsets.all(10.0),
-                child: Container(
-                  height: 60,
-                  width: 60,
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(25),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x20e2861d),
-                        spreadRadius: 2,
-                        blurRadius: 20,
-                        offset: Offset(0, 0),
-                      ),
-                    ],
-                  ),
-                  child: const Center(
-                    child: FaIcon(
-                      FontAwesomeIcons.qrcode,
-                      size: 25,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              )),
+  bottom: 20,
+  right: 0,
+  child: GestureDetector(
+    onTap: () async {
+      final isValid = await validateToken();
+
+      if (isValid) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const TicketsPage()),
+        );
+      } else {
+        // Redirect to Sign In or Register page
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const SignInPage()),
+        );
+      }
+    },
+    child: Container(
+      padding: const EdgeInsets.all(10.0),
+      child: Container(
+        height: 60,
+        width: 60,
+        decoration: BoxDecoration(
+          color: Colors.black,
+          borderRadius: BorderRadius.circular(25),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x20e2861d),
+              spreadRadius: 2,
+              blurRadius: 20,
+              offset: Offset(0, 0),
+            ),
+          ],
+        ),
+        child: const Center(
+          child: FaIcon(
+            FontAwesomeIcons.qrcode,
+            size: 25,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    ),
+  ),
+),
           Positioned(
             bottom: 100,
             left: 0,
