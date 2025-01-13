@@ -26,10 +26,9 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> closestStops = [];
   Timer? debounceTimer;
   PointAnnotation? locationIndicator; // Custom location marker
-  
 
   static const String stopsApiUrl = 'https://api.thebus.info/v1/stops';
-  
+
   bool isCameraUpdated = false;
   @override
   void dispose() {
@@ -39,26 +38,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _onMapCreated(MapboxMap mapboxMap) async {
     this.mapboxMap = mapboxMap;
-    
+
     pointAnnotationManager =
         await mapboxMap.annotations.createPointAnnotationManager();
 
-     
-
     await _initializeLocationTracking();
     await _fetchStops();
-  
+
     // await _addStopsAsLayer();
     await _addStopClusters();
-    
-
-    
   }
 
   late Uint8List imageData;
-
- 
-  
 
   Future<void> _fetchStops() async {
     try {
@@ -118,75 +109,78 @@ class _HomeScreenState extends State<HomeScreen> {
       _showError('Error fetching closest stops: $e');
     }
   }
- 
-Future<void> _addStopClusters() async {
-  final Brightness brightnessValue = MediaQuery.of(context).platformBrightness;
+
+  Future<void> _addStopClusters() async {
+    final Brightness brightnessValue =
+        MediaQuery.of(context).platformBrightness;
     bool isDark = brightnessValue == Brightness.dark;
-  try {
-    // Prepare GeoJSON data for stops
-    final stopsGeoJson = {
-      "type": "FeatureCollection",
-      "features": stops.map((stop) {
-        return {
-          "type": "Feature",
-          "geometry": {
-            "type": "Point",
-            "coordinates": [stop['longitude'], stop['latitude']],
-          },
-          "properties": {
-            "name": stop['name'],
-          },
-        };
-      }).toList(),
-    };
+    try {
+      // Prepare GeoJSON data for stops
+      final stopsGeoJson = {
+        "type": "FeatureCollection",
+        "features": stops.map((stop) {
+          return {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [stop['longitude'], stop['latitude']],
+            },
+            "properties": {
+              "name": stop['name'],
+            },
+          };
+        }).toList(),
+      };
 
-    // Add GeoJSON source with clustering enabled
-    await mapboxMap.style.addSource(GeoJsonSource(
-      id: 'stop-cluster-source', // Source ID
-      data: json.encode(stopsGeoJson),
-      cluster: true,
-      clusterRadius: 50, // Radius for clustering
-      clusterMaxZoom: 14.6, // Maximum zoom to cluster points
-      tolerance: 0.0, // Tolerance for clustering
-    ));
+      // Add GeoJSON source with clustering enabled
+      await mapboxMap.style.addSource(GeoJsonSource(
+        id: 'stop-cluster-source', // Source ID
+        data: json.encode(stopsGeoJson),
+        cluster: true,
+        clusterRadius: 50, // Radius for clustering
+        clusterMaxZoom: 14.6, // Maximum zoom to cluster points
+        tolerance: 0.0, // Tolerance for clustering
+      ));
 
-    // Add a layer for clusters
-    await mapboxMap.style.addLayer(SymbolLayer(
-      id: 'cluster-layer',
-      sourceId: 'stop-cluster-source',
-      filter: ['has', 'point_count'],
-      iconImage: "bus-cluster",
-      iconSize: 0.12,
-      textField: '{point_count}',
-      textOffset: [0.0, 0.0],
-      textSize: 16,
-      textMaxWidth: 20,
-      iconAllowOverlap: true,
-      textColor:const Color(0xFFE2861D).value,
+      // Add a layer for clusters
+      await mapboxMap.style.addLayer(SymbolLayer(
+        id: 'cluster-layer',
+        sourceId: 'stop-cluster-source',
+        filter: ['has', 'point_count'],
+        iconImage: "bus-cluster",
+        iconSize: 0.12,
+        textField: '{point_count}',
+        textOffset: [0.0, 0.0],
+        textSize: 16,
+        textMaxWidth: 20,
+        iconAllowOverlap: true,
+        textColor: const Color(0xFFE2861D).value,
+      ));
 
-
-    ));
-
-    // Add a layer for individual points (non-clustered)
-    await mapboxMap.style.addLayer(SymbolLayer(
-      id: 'stop-layer',
-      sourceId: 'stop-cluster-source',
-      filter: ['!', ['has', 'point_count']],
-      iconImage: "bus-stop",
-      iconAnchor: IconAnchor.BOTTOM,
-      iconSize: 0.08,
-      textField: '{name}',
-      textOffset: [0.0, 1.2],
-      textColor: isDark  ?const Color(0xFFFFFFFF).value :const Color(0xFF000000).value,
-      textSize: 10,
-      iconKeepUpright: true ,  
-      iconAllowOverlap: true,
-
-    ));
-  } catch (e) {
-    _showError('Error adding stop clusters: $e');
+      // Add a layer for individual points (non-clustered)
+      await mapboxMap.style.addLayer(SymbolLayer(
+        id: 'stop-layer',
+        sourceId: 'stop-cluster-source',
+        filter: [
+          '!',
+          ['has', 'point_count']
+        ],
+        iconImage: "bus-stop",
+        iconAnchor: IconAnchor.BOTTOM,
+        iconSize: 0.08,
+        textField: '{name}',
+        textOffset: [0.0, 1.2],
+        textColor: isDark
+            ? const Color(0xFFFFFFFF).value
+            : const Color(0xFF000000).value,
+        textSize: 10,
+        iconKeepUpright: true,
+        iconAllowOverlap: true,
+      ));
+    } catch (e) {
+      _showError('Error adding stop clusters: $e');
+    }
   }
-}
 
   Future<void> _initializeLocationTracking() async {
     if (!await location.serviceEnabled()) {
@@ -252,7 +246,8 @@ Future<void> _addStopClusters() async {
 
   @override
   Widget build(BuildContext context) {
-    final Brightness brightnessValue = MediaQuery.of(context).platformBrightness;
+    final Brightness brightnessValue =
+        MediaQuery.of(context).platformBrightness;
     bool isDark = brightnessValue == Brightness.dark;
     return Scaffold(
       body: Stack(
@@ -267,126 +262,122 @@ Future<void> _addStopClusters() async {
                   ),
                 ),
                 zoom: 4.9,
-                
                 padding: MbxEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)),
-
-            styleUri:  isDark 
-            ? "mapbox://styles/szocske23/cm4brvrj900pb01r1eq8z9spy"
-            : "mapbox://styles/szocske23/cm4fsoniy000g01r025ho4kxy",
+            styleUri: isDark
+                ? "mapbox://styles/szocske23/cm4brvrj900pb01r1eq8z9spy"
+                : "mapbox://styles/szocske23/cm4fsoniy000g01r025ho4kxy",
             textureView: true,
-
             onMapCreated: _onMapCreated,
           ),
           Positioned(
-            bottom: 20,
+              bottom: 20,
+              left: 0,
+              right: 70,
+              child: Container(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Container(
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(25),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x20e2861d),
+                          spreadRadius: 2,
+                          blurRadius: 20,
+                          offset: Offset(0, 0),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.only(left: 15),
+                          child: const Center(
+                            child: FaIcon(
+                              FontAwesomeIcons.mapLocationDot,
+                              size: 20,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: TextField(
+                            style: const TextStyle(color: Colors.white),
+                            decoration: const InputDecoration(
+                              hintText: 'Search for destination...',
+                              hintStyle: TextStyle(color: Colors.grey),
+                              border: InputBorder.none,
+                            ),
+                            onChanged: (value) {
+                              // Handle search query updates
+                              print('Search query: $value');
+                            },
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            // Add logic for clearing the search or submitting it
+                            print('Search icon pressed');
+                          },
+                          icon: const FaIcon(
+                            FontAwesomeIcons.magnifyingGlass,
+                            size: 20,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ))),
+          Positioned(
+              bottom: 20,
+              right: 0,
+              child: Container(
+                padding: const EdgeInsets.all(10.0),
+                child: Container(
+                  height: 60,
+                  width: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(25),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x20e2861d),
+                        spreadRadius: 2,
+                        blurRadius: 20,
+                        offset: Offset(0, 0),
+                      ),
+                    ],
+                  ),
+                  child: const Center(
+                    child: FaIcon(
+                      FontAwesomeIcons.qrcode,
+                      size: 25,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              )),
+          Positioned(
+            bottom: 100,
             left: 0,
-            right: 70,
-            child: Container( padding: const EdgeInsets.all(10.0),
-              child: Container(
-                height: 60,
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.circular(25),
-                  boxShadow: const [
-                            BoxShadow(
-                              color: Color(0x20e2861d),
-                              spreadRadius: 2,
-                              blurRadius: 20,
-                              offset: Offset(0, 0),
-                            ),
-                          ],
-                ),
-                child: Row(
-      children: [
-        const Padding(
-          padding: EdgeInsets.only(left: 15),
-          child: const Center(
-                  child: FaIcon(
-                  FontAwesomeIcons.mapLocationDot,
-                  size: 20,
-                  color: Colors.white,
-                  ),
-                ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: TextField(
-            style: const TextStyle(color: Colors.white),
-            decoration: const InputDecoration(
-              hintText: 'Search for destination...',
-              hintStyle: TextStyle(color: Colors.grey),
-              border: InputBorder.none,
-            ),
-            onChanged: (value) {
-              // Handle search query updates
-              print('Search query: $value');
-            },
-          ),
-        ),
-        IconButton(
-          onPressed: () {
-            // Add logic for clearing the search or submitting it
-            print('Search icon pressed');
-          },
-          icon: const FaIcon(
-                  FontAwesomeIcons.magnifyingGlass,
-                  size: 20,
-                  color: Colors.white,
-                  ),
-        ),
-      ],
-    ),
-                )
-                )
-          ),
-          Positioned(
-            bottom: 20,
             right: 0,
-            child: Container( padding: const EdgeInsets.all(10.0),
-              child: Container(
-                height: 60,
-                width: 60,
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.circular(25),
-                  boxShadow: const [
-                            BoxShadow(
-                              color: Color(0x20e2861d),
-                              spreadRadius: 2,
-                              blurRadius: 20,
-                              offset: Offset(0, 0),
-                            ),
-                          ],
-                ),
-                child: const Center(
-                  child: FaIcon(
-                  FontAwesomeIcons.qrcode,
-                  size: 25,
-                  color: Colors.white,
-                  ),
-                ),
-                ),
-                )
+            child: SizedBox(
+              height: 90,
+              child: PageView.builder(
+                itemCount: closestStops.length,
+                controller: PageController(viewportFraction: 0.9),
+                itemBuilder: (context, index) {
+                  final stop = closestStops[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    child: _buildStopView(context, stop),
+                  );
+                },
+              ),
+            ),
           ),
-          Positioned(
-  bottom: 100,
-  left: 0,
-  right: 0,
-  child: SizedBox(
-    height: 90,
-    child: PageView.builder(
-            itemCount: closestStops.length,
-            controller: PageController(viewportFraction: 0.9),
-            itemBuilder: (context, index) {
-              final stop = closestStops[index];
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 5),
-                child: _buildStopView(context, stop),
-              );
-            },
-          ),
-  ),
-),
         ],
       ),
     );
@@ -395,136 +386,134 @@ Future<void> _addStopClusters() async {
 
 Widget _buildStopView(BuildContext context, Map<String, dynamic> stop) {
   return GestureDetector(
-  onTap: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => StopDetailsPage(stopId: stop['id']),
-      ),
-    );
-  },
-  child: Container(
-  decoration: BoxDecoration(
-    color: Colors.black,
-    borderRadius: BorderRadius.circular(25),
-    boxShadow: const [
-      BoxShadow(
-        color: Color(0x20e2861d),
-        spreadRadius: 2,
-        blurRadius: 20,
-        offset: Offset(0, 0),
-      ),
-    ],
-  ),
-  padding: const EdgeInsets.only(left: 15, top: 15, right: 15, bottom: 10),
-  child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Text(
-            '${stop["name"]}',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(width: 16),
-          Text(
-            '${(stop["distance"] * 1000).toStringAsFixed(0)} m',
-             // ignore: avoid_print
-          
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-              color: Colors.grey,
-            ),
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => StopDetailsPage(stopId: stop['id']),
+        ),
+      );
+    },
+    child: Container(
+      decoration: BoxDecoration(
+        color: Colors.black,
+        borderRadius: BorderRadius.circular(25),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x20e2861d),
+            spreadRadius: 2,
+            blurRadius: 20,
+            offset: Offset(0, 0),
           ),
         ],
       ),
-      
-      const SizedBox(height: 8),
-      if (stop["routes"] != null && stop["routes"].isNotEmpty)
-      
-        Row(
-          children: [
-            Container(
-              height: 28,
-              padding: const EdgeInsets.all(5),
-              decoration: const BoxDecoration(
-                color: Color(0xFFFF7C0A),
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(6),
-                  bottomRight: Radius.circular(4),
-                  bottomLeft: Radius.circular(10),
-                  topRight: Radius.circular(4),
+      padding: const EdgeInsets.only(left: 15, top: 15, right: 15, bottom: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(
+                '${stop["name"]}',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(width: 16),
+              Text(
+                '${(stop["distance"] * 1000).toStringAsFixed(0)} m',
+                // ignore: avoid_print
+
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.grey,
                 ),
               ),
-              child: const Icon(
-                Icons.directions_bus,
-                size: 15,
-                color: Colors.black,
-              ),
-            ),
-            const SizedBox(width: 4),
-            Expanded(
-              child: Wrap(
-                spacing: 4,
-                runSpacing: 4,
-                
-                children: stop["routes"].take(3).map<Widget>((route) {
-                  print(stop);
-                  return Container(
-                    height: 28,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 4.5,
-                      horizontal: 8,
+            ],
+          ),
+          const SizedBox(height: 8),
+          if (stop["routes"] != null && stop["routes"].isNotEmpty)
+            Row(
+              children: [
+                Container(
+                  height: 28,
+                  padding: const EdgeInsets.all(5),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFFF7C0A),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(6),
+                      bottomRight: Radius.circular(4),
+                      bottomLeft: Radius.circular(10),
+                      topRight: Radius.circular(4),
                     ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE2861D), // Fixed color for routes
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      route["name"],
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.black,
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
+                  ),
+                  child: const Icon(
+                    Icons.directions_bus,
+                    size: 15,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Wrap(
+                    spacing: 4,
+                    runSpacing: 4,
+                    children: stop["routes"].take(3).map<Widget>((route) {
+                      print(stop);
+                      return Container(
+                        height: 28,
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 4.5,
+                          horizontal: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color:
+                              const Color(0xFFE2861D), // Fixed color for routes
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          route["name"],
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
+            )
+          else
+            const Row(
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  size: 16,
+                  color: Colors.grey,
+                ),
+                SizedBox(width: 8),
+                Text(
+                  'No routes available',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
             ),
-          ],
-        )
-      else
-        const Row(
-          children: [
-            Icon(
-              Icons.info_outline,
-              size: 16,
-              color: Colors.grey,
-            ),
-            SizedBox(width: 8),
-            Text(
-              'No routes available',
-              style: TextStyle(
-                fontSize: 12,
-                fontStyle: FontStyle.italic,
-                color: Colors.grey,
-              ),
-            ),
-          ],
-        ),
-    ],
-  ),
-),
+        ],
+      ),
+    ),
   );
 }
 
@@ -537,6 +526,3 @@ Color hexStringToColor(String hexColor) {
   buffer.write(hexColor);
   return Color(int.parse(buffer.toString(), radix: 16));
 }
-
-
-

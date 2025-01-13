@@ -191,44 +191,52 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
                                   1.4, // Adjust the thickness of the divider
                             ),
                             Expanded(
-  child: services.isEmpty
-      ? const Center(
-          child: Text(
-            "No services available",
-            style: TextStyle(color: Colors.white, fontSize: 16),
-          ),
-        )
-      : SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: List.generate(services.length, (index) {
-              final service = services[index];
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      service['service_name'] ?? 'Unknown Service',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                    Text(
-                      _formatTimeAtStop(service['time_at_stop']),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }),
-          ),
-        ),
-)
+                              child: services.isEmpty
+                                  ? const Center(
+                                      child: Text(
+                                        "No services available",
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 16),
+                                      ),
+                                    )
+                                  : SingleChildScrollView(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: List.generate(services.length,
+                                            (index) {
+                                          final service = services[index];
+                                          return Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 8.0),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Text(
+                                                  service['service_name'] ??
+                                                      'Unknown Service',
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 16,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  _formatTimeAtStop(
+                                                      service['time_at_stop']),
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 16,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        }),
+                                      ),
+                                    ),
+                            )
                           ],
                         ))),
               ],
@@ -236,8 +244,6 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
     );
   }
 }
-
-
 
 String _formatTimeAtStop(String? timeAtStop) {
   if (timeAtStop == null) return "N/A";
