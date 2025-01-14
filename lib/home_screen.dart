@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:app_thebusinfo/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
@@ -10,8 +11,6 @@ import 'stop_details_page.dart';
 import 'tickets_page.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'signin_page.dart';
-
-
 
 Future<bool> validateToken() async {
   final tokens = await AuthStorage.getTokens();
@@ -46,7 +45,6 @@ class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
-
 
 class AuthStorage {
   static const _storage = FlutterSecureStorage();
@@ -335,6 +333,44 @@ class _HomeScreenState extends State<HomeScreen> {
             onMapCreated: _onMapCreated,
           ),
           Positioned(
+            top: 50,
+            right: 0,
+            child: GestureDetector(
+              onTap: () async {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SettingsPage()),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.all(10.0),
+                child: Container(
+                  height: 60,
+                  width: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(25),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x20e2861d),
+                        spreadRadius: 2,
+                        blurRadius: 20,
+                        offset: Offset(0, 0),
+                      ),
+                    ],
+                  ),
+                  child: const Center(
+                    child: FaIcon(
+                      FontAwesomeIcons.gear,
+                      size: 25,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
               bottom: 20,
               left: 0,
               right: 70,
@@ -396,53 +432,54 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ))),
           Positioned(
-  bottom: 20,
-  right: 0,
-  child: GestureDetector(
-    onTap: () async {
-      final isValid = await validateToken();
+            bottom: 20,
+            right: 0,
+            child: GestureDetector(
+              onTap: () async {
+                final isValid = await validateToken();
 
-      if (isValid) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const TicketsPage()),
-        );
-      } else {
-        // Redirect to Sign In or Register page
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const SignInPage()),
-        );
-      }
-    },
-    child: Container(
-      padding: const EdgeInsets.all(10.0),
-      child: Container(
-        height: 60,
-        width: 60,
-        decoration: BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(25),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x20e2861d),
-              spreadRadius: 2,
-              blurRadius: 20,
-              offset: Offset(0, 0),
+                if (isValid) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const TicketsPage()),
+                  );
+                } else {
+                  // Redirect to Sign In or Register page
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const SignInPage()),
+                  );
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.all(10.0),
+                child: Container(
+                  height: 60,
+                  width: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(25),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x20e2861d),
+                        spreadRadius: 2,
+                        blurRadius: 20,
+                        offset: Offset(0, 0),
+                      ),
+                    ],
+                  ),
+                  child: const Center(
+                    child: FaIcon(
+                      FontAwesomeIcons.qrcode,
+                      size: 25,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
             ),
-          ],
-        ),
-        child: const Center(
-          child: FaIcon(
-            FontAwesomeIcons.qrcode,
-            size: 25,
-            color: Colors.white,
           ),
-        ),
-      ),
-    ),
-  ),
-),
           Positioned(
             bottom: 100,
             left: 0,

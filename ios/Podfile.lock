@@ -16,6 +16,8 @@ PODS:
     - MapboxCommon (= 24.9.0)
     - MapboxCoreMaps (= 11.9.0)
     - Turf (= 4.0.0)
+  - package_info_plus (0.4.5):
+    - Flutter
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -26,6 +28,7 @@ DEPENDENCIES:
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - location (from `.symlinks/plugins/location/ios`)
   - mapbox_maps_flutter (from `.symlinks/plugins/mapbox_maps_flutter/ios`)
+  - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
 
 SPEC REPOS:
@@ -44,6 +47,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/location/ios"
   mapbox_maps_flutter:
     :path: ".symlinks/plugins/mapbox_maps_flutter/ios"
+  package_info_plus:
+    :path: ".symlinks/plugins/package_info_plus/ios"
   path_provider_foundation:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
 
@@ -55,6 +60,7 @@ SPEC CHECKSUMS:
   MapboxCommon: 678bfc4b477a804244fd7323c79cc7f2402f844e
   MapboxCoreMaps: 5cd77c7251dea10903135e8427c788212bd26346
   MapboxMaps: 2ce57c4ec89d8f05eacfebdd39b01216e0c06168
+  package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   Turf: c9eb11a65d96af58cac523460fd40fec5061b081
 
