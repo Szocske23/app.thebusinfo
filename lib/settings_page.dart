@@ -77,9 +77,11 @@ class _SettingsPageState extends State<SettingsPage> {
       appBar: AppBar(
         title: const Text('Setari', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.black,
+        
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: SingleChildScrollView(
+        
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
@@ -118,18 +120,34 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
       ),
       backgroundColor: Colors.black,
+      
     );
   }
 
   Widget _buildButton(IconData icon, String label, VoidCallback onPressed) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-      child: ElevatedButton(
+      child:Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(25),
+                  gradient: const RadialGradient(
+                    colors: [
+                      Color(0x09E2861D) ,// End color
+                      Color(0x99E2861D),
+                      
+                    ],
+                    radius:40,
+                    focal: Alignment.bottomLeft
+                  ),
+                ),
+                child:
+      ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.grey[900], // Button background color
-          padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15.0),
+          backgroundColor: Colors.transparent, // Button background color
+          padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 20.0),
+          minimumSize: const Size.fromHeight(60),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
+            borderRadius: BorderRadius.circular(25.0),
           ),
         ),
         onPressed: onPressed,
@@ -138,7 +156,7 @@ class _SettingsPageState extends State<SettingsPage> {
           children: [
             SizedBox(
               width: 25,
-              child: FaIcon(icon, size: 25, color: Colors.white),
+              child: FaIcon(icon, size: 25, color: const Color(0xFFe2861d)),
             ),
             const SizedBox(width: 16),
             Text(
@@ -147,6 +165,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ],
         ),
+      ),
       ),
     );
   }

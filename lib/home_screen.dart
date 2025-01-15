@@ -363,7 +363,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: FaIcon(
                       FontAwesomeIcons.gear,
                       size: 25,
-                      color: Colors.white,
+                      color: Colors.grey,
                     ),
                   ),
                 ),

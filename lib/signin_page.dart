@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:app_thebusinfo/home_screen.dart';
+import 'package:flutter/cupertino.dart';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -41,14 +42,19 @@ class _SignInPageState extends State<SignInPage> {
         };
 
         if (tokens.values.every((value) => value != null)) {
-          await _storage.write(key: 'access-token', value: tokens['access-token']);
+          await _storage.write(
+              key: 'access-token', value: tokens['access-token']);
           await _storage.write(key: 'client', value: tokens['client']);
           await _storage.write(key: 'uid', value: tokens['uid']);
-          await _storage.write(key: 'authorization', value: tokens['authorization']);
+          await _storage.write(
+              key: 'authorization', value: tokens['authorization']);
 
-          // Navigate to Tickets page
-         
-          MaterialPageRoute(builder: (context) => const HomeScreen());
+          // Navigate to HomeScreen
+          // ignore: use_build_context_synchronously
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        
         } else {
           setState(() {
             _errorMessage = 'Missing tokens in the response';
@@ -57,7 +63,8 @@ class _SignInPageState extends State<SignInPage> {
       } else {
         final responseBody = json.decode(response.body);
         setState(() {
-          _errorMessage = responseBody['errors']?.join(', ') ?? 'Sign-in failed';
+          _errorMessage =
+              responseBody['errors']?.join(', ') ?? 'Sign-in failed';
         });
       }
     } catch (e) {
@@ -74,12 +81,30 @@ class _SignInPageState extends State<SignInPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Sign In')),
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.white),
+        title: const Text(
+          'Sign In',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+      backgroundColor: Colors.black,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
+            const SizedBox(height: 40),
+            Image.asset(
+              'assets/logo_trsp.png',
+              width: 500,
+            ),
+            const SizedBox(height: 40),
             if (_errorMessage != null)
               Text(
                 _errorMessage!,
@@ -88,40 +113,122 @@ class _SignInPageState extends State<SignInPage> {
             const SizedBox(height: 16),
             TextField(
               controller: _emailController,
+              style: const TextStyle(color: Colors.white, fontSize: 16),
+              autocorrect: false,
+              autofillHints: const [AutofillHints.email], 
+              textInputAction: TextInputAction.next,
               decoration: const InputDecoration(
                 labelText: 'Email',
-                border: OutlineInputBorder(),
+                floatingLabelStyle: TextStyle(color: Color(0xFFE2861D)),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFFE2861D)),
+                  borderRadius: BorderRadius.all(Radius.circular(25)),
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(25)),
+                ),
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 20, horizontal: 16),
               ),
               keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _passwordController,
+              style: const TextStyle(color: Colors.white, fontSize: 16),
+              autocorrect: false,
+              autofillHints: const [AutofillHints.password],
+              textInputAction: TextInputAction.done,
+              onEditingComplete: _isLoading
+                      ? null
+                      : () {
+                          final email = _emailController.text.trim();
+                          final password = _passwordController.text.trim();
+
+                          if (email.isEmpty || password.isEmpty) {
+                            setState(() {
+                              _errorMessage =
+                                  'Email and password are required.';
+                            });
+                          } else {
+                            _signIn(email, password);
+                          }
+                        },
               decoration: const InputDecoration(
                 labelText: 'Password',
-                border: OutlineInputBorder(),
+                floatingLabelStyle: TextStyle(color: Color(0xFFE2861D)),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFFE2861D)),
+                  borderRadius: BorderRadius.all(Radius.circular(25)),
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(25)),
+                ),
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 20, horizontal: 16),
               ),
               obscureText: true,
             ),
             const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _isLoading
-                  ? null
-                  : () {
-                      final email = _emailController.text.trim();
-                      final password = _passwordController.text.trim();
+            SizedBox(
+              width: double.infinity, // Full width of the parent container
+              height: 60, // Button height
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(25),
+                  gradient: const RadialGradient(
+                    colors: [
+                      Color(0x99E2861D), // Start color
+                      Colors.black, // End color
+                    ],
+                    radius: 3.7,
+                  ),
+                ),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                  ),
+                  onPressed: _isLoading
+                      ? null
+                      : () {
+                          final email = _emailController.text.trim();
+                          final password = _passwordController.text.trim();
 
-                      if (email.isEmpty || password.isEmpty) {
-                        setState(() {
-                          _errorMessage = 'Email and password are required.';
-                        });
-                      } else {
-                        _signIn(email, password);
-                      }
-                    },
-              child: _isLoading
-                  ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text('Sign In'),
+                          if (email.isEmpty || password.isEmpty) {
+                            setState(() {
+                              _errorMessage =
+                                  'Email and password are required.';
+                            });
+                          } else {
+                            _signIn(email, password);
+                          }
+                        },
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text(
+                          'Sign In',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            TextButton(
+              onPressed: () {
+                // Navigate to the Sign Up page
+              },
+              child: const Text(
+                'Don\'t have an account? Sign Up',
+                style: TextStyle(color: Colors.grey),
+              ),
             ),
           ],
         ),
