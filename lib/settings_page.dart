@@ -76,11 +76,28 @@ class _SettingsPageState extends State<SettingsPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Setari', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.transparent,
         
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: SingleChildScrollView(
+      body:Container(
+      // Add gradient background here
+      height: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: RadialGradient(
+          colors: [
+            Color.fromARGB(182, 222, 119, 1), 
+            Color(0x10000000),
+            Color(0x10000000),
+          ],
+          focal: FractionalOffset.bottomLeft,
+          radius: 3.4,
+          stops: [0.0, 0.5, 1.0],
+          
+          focalRadius: 0.2
+        ),
+      ),
+      child: SingleChildScrollView(
         
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,9 +136,11 @@ class _SettingsPageState extends State<SettingsPage> {
           ],
         ),
       ),
-      backgroundColor: Colors.black,
       
+      ),  
+      backgroundColor: Colors.transparent,
     );
+    
   }
 
   Widget _buildButton(IconData icon, String label, VoidCallback onPressed) {
@@ -130,15 +149,7 @@ class _SettingsPageState extends State<SettingsPage> {
       child:Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(25),
-                  gradient: const RadialGradient(
-                    colors: [
-                      Color(0x09E2861D) ,// End color
-                      Color(0x99E2861D),
-                      
-                    ],
-                    radius:40,
-                    focal: Alignment.bottomLeft
-                  ),
+                  color: Colors.black
                 ),
                 child:
       ElevatedButton(

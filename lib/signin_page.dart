@@ -82,7 +82,8 @@ class _SignInPageState extends State<SignInPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.transparent,
+        shadowColor: Colors.transparent,
         iconTheme: const IconThemeData(color: Colors.white),
         title: const Text(
           'Sign In',
@@ -93,8 +94,24 @@ class _SignInPageState extends State<SignInPage> {
           ),
         ),
       ),
-      backgroundColor: Colors.black,
-      body: Padding(
+      backgroundColor: Colors.transparent,
+      body:Container(
+      // Add gradient background here
+      decoration: const BoxDecoration(
+        gradient: RadialGradient(
+          colors: [
+            Color.fromARGB(182, 222, 119, 1), 
+            Color(0x10000000),
+            Color(0x10000000),
+          ],
+          focal: FractionalOffset.bottomLeft,
+          radius: 3.8,
+          stops: [0.0, 0.4, 0.8],
+          tileMode: TileMode.clamp,
+          focalRadius: 0.2
+        ),
+      ),
+      child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -176,13 +193,7 @@ class _SignInPageState extends State<SignInPage> {
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(25),
-                  gradient: const RadialGradient(
-                    colors: [
-                      Color(0x99E2861D), // Start color
-                      Colors.black, // End color
-                    ],
-                    radius: 3.7,
-                  ),
+                  color:  Colors.black,
                 ),
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -232,6 +243,7 @@ class _SignInPageState extends State<SignInPage> {
             ),
           ],
         ),
+      ),
       ),
     );
   }
