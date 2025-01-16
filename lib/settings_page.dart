@@ -72,50 +72,82 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Setari', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.transparent,
-        
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
-      body:Container(
-      // Add gradient background here
-      height: double.infinity,
-      decoration: const BoxDecoration(
-        gradient: RadialGradient(
-          colors: [
-            Color.fromARGB(182, 222, 119, 1), 
-            Color(0x10000000),
-            Color(0x10000000),
-          ],
-          focal: FractionalOffset.bottomLeft,
-          radius: 3.4,
-          stops: [0.0, 0.5, 1.0],
-          
-          focalRadius: 0.2
-        ),
-      ),
-      child: SingleChildScrollView(
-        
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            const SizedBox(height: 20),
-            _buildButton(FontAwesomeIcons.solidUser, 'Profil', () {}),
-            _buildButton(FontAwesomeIcons.solidBell, 'Notificare', () {}),
-            _buildButton(FontAwesomeIcons.shield, 'Privacy', () {}),
-            _buildButton(FontAwesomeIcons.globe, 'Language', () {}),
-            _buildButton(FontAwesomeIcons.solidCircleQuestion, 'Help', () {}),
-            _buildButton(FontAwesomeIcons.circleInfo, 'About', () {}),
-            _buildButton(FontAwesomeIcons.retweet, 'Updates', () {}),
-            _buildButton(FontAwesomeIcons.rightFromBracket, 'Sign Out', () {
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: const Text('Setari', style: TextStyle(color: Colors.white)),
+      backgroundColor: Colors.transparent,
+      iconTheme: const IconThemeData(color: Colors.white),
+    ),
+    body: SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          const SizedBox(height: 20),
+          _buildButton(
+            FontAwesomeIcons.solidUser,
+            'Profil',
+            () {},
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(25),
+              topRight: Radius.circular(25),
+              bottomLeft: Radius.circular(8),
+              bottomRight: Radius.circular(8),
+            ),
+          ),
+          _buildButton(
+            FontAwesomeIcons.solidBell,
+            'Notificare',
+            () {},
+            borderRadius: const BorderRadius.all(Radius.circular(8)),
+          ),
+          _buildButton(
+            FontAwesomeIcons.shield,
+            'Privacy',
+            () {},
+            borderRadius: const BorderRadius.all(Radius.circular(8)),
+          ),
+          _buildButton(
+            FontAwesomeIcons.globe,
+            'Language',
+            () {},
+            borderRadius: const BorderRadius.all(Radius.circular(8)),
+          ),
+          _buildButton(
+            FontAwesomeIcons.solidCircleQuestion,
+            'Help',
+            () {},
+            borderRadius: const BorderRadius.all(Radius.circular(8)),
+          ),
+          _buildButton(
+            FontAwesomeIcons.circleInfo,
+            'About',
+            () {},
+            borderRadius: const BorderRadius.all(Radius.circular(8)),
+          ),
+          _buildButton(
+            FontAwesomeIcons.retweet,
+            'Updates',
+            () {},
+            borderRadius: const BorderRadius.all(Radius.circular(8)),
+          ),
+          _buildButton(
+            FontAwesomeIcons.rightFromBracket,
+            'Sign Out',
+            () {
               _signOut(context);
-            }),
-            Center(
-              child: Padding(
+            },
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(8),
+              topRight: Radius.circular(8),
+              bottomLeft: Radius.circular(25),
+              bottomRight: Radius.circular(25),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Center(
+            child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
@@ -131,34 +163,42 @@ class _SettingsPageState extends State<SettingsPage> {
                 ],
               ),
             ),
-            )
-            
+          ),
+        ],
+      ),
+    ),
+    backgroundColor: Colors.black,
+  );
+}
+
+Widget _buildButton(
+  IconData icon,
+  String label,
+  VoidCallback onPressed, {
+  required BorderRadius borderRadius,
+}) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 10.0),
+    child: Container(
+      decoration: BoxDecoration(
+        borderRadius: borderRadius,
+        gradient: const RadialGradient(
+          colors: [
+            Color(0x258E8E8E),
+            Color(0x15d9811c),
           ],
+          focal: Alignment.topRight,
+          radius: 8,
+          stops: [-20, 8],
         ),
       ),
-      
-      ),  
-      backgroundColor: Colors.transparent,
-    );
-    
-  }
-
-  Widget _buildButton(IconData icon, String label, VoidCallback onPressed) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-      child:Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(25),
-                  color: Colors.black
-                ),
-                child:
-      ElevatedButton(
+      child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent, // Button background color
           padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 20.0),
           minimumSize: const Size.fromHeight(60),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(25.0),
+            borderRadius: borderRadius,
           ),
         ),
         onPressed: onPressed,
@@ -177,7 +217,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ],
         ),
       ),
-      ),
-    );
-  }
+    ),
+  );
+}
 }

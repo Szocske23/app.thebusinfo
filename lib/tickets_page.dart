@@ -73,12 +73,12 @@ class _TicketsPageState extends State<TicketsPage> {
         decoration: const BoxDecoration(
           gradient: RadialGradient(
               colors: [
-                Color.fromARGB(182, 222, 119, 1),
-                Color(0x10000000),
+                Color.fromARGB(16, 0, 0, 0),
+                Color.fromARGB(80, 27, 27, 27),
                 Color(0x10000000),
               ],
               focal: FractionalOffset.bottomLeft,
-              radius: 3.4,
+              radius: 2,
               stops: [0.0, 0.5, 1.0],
               focalRadius: 0.2),
         ),
@@ -280,7 +280,7 @@ class TicketCard extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             
-          ],
+          ]
         ),
       ),
     );
