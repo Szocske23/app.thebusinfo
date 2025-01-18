@@ -72,152 +72,153 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(
-      title: const Text('Setari', style: TextStyle(color: Colors.white)),
-      backgroundColor: Colors.transparent,
-      iconTheme: const IconThemeData(color: Colors.white),
-    ),
-    body: SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          const SizedBox(height: 20),
-          _buildButton(
-            FontAwesomeIcons.solidUser,
-            'Profil',
-            () {},
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(25),
-              topRight: Radius.circular(25),
-              bottomLeft: Radius.circular(8),
-              bottomRight: Radius.circular(8),
-            ),
-          ),
-          _buildButton(
-            FontAwesomeIcons.solidBell,
-            'Notificare',
-            () {},
-            borderRadius: const BorderRadius.all(Radius.circular(8)),
-          ),
-          _buildButton(
-            FontAwesomeIcons.shield,
-            'Privacy',
-            () {},
-            borderRadius: const BorderRadius.all(Radius.circular(8)),
-          ),
-          _buildButton(
-            FontAwesomeIcons.globe,
-            'Language',
-            () {},
-            borderRadius: const BorderRadius.all(Radius.circular(8)),
-          ),
-          _buildButton(
-            FontAwesomeIcons.solidCircleQuestion,
-            'Help',
-            () {},
-            borderRadius: const BorderRadius.all(Radius.circular(8)),
-          ),
-          _buildButton(
-            FontAwesomeIcons.circleInfo,
-            'About',
-            () {},
-            borderRadius: const BorderRadius.all(Radius.circular(8)),
-          ),
-          _buildButton(
-            FontAwesomeIcons.retweet,
-            'Updates',
-            () {},
-            borderRadius: const BorderRadius.all(Radius.circular(8)),
-          ),
-          _buildButton(
-            FontAwesomeIcons.rightFromBracket,
-            'Sign Out',
-            () {
-              _signOut(context);
-            },
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(8),
-              topRight: Radius.circular(8),
-              bottomLeft: Radius.circular(25),
-              bottomRight: Radius.circular(25),
-            ),
-          ),
-          const SizedBox(height: 6),
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  Text(
-                    "Version $_version (Build $_buildNumber)",
-                    style: const TextStyle(fontSize: 14, color: Colors.grey),
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    "© 2025 Prosoft.plus",
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Setari', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.transparent,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
-    ),
-    backgroundColor: Colors.black,
-  );
-}
-
-Widget _buildButton(
-  IconData icon,
-  String label,
-  VoidCallback onPressed, {
-  required BorderRadius borderRadius,
-}) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 10.0),
-    child: Container(
-      decoration: BoxDecoration(
-        borderRadius: borderRadius,
-        gradient: const RadialGradient(
-          colors: [
-            Color(0x258E8E8E),
-            Color(0x15d9811c),
-          ],
-          focal: Alignment.topRight,
-          radius: 8,
-          stops: [-20, 8],
-        ),
-      ),
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent, // Button background color
-          padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 20.0),
-          minimumSize: const Size.fromHeight(60),
-          shape: RoundedRectangleBorder(
-            borderRadius: borderRadius,
-          ),
-        ),
-        onPressed: onPressed,
-        child: Row(
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            SizedBox(
-              width: 25,
-              child: FaIcon(icon, size: 25, color: const Color(0xFFe2861d)),
+            const SizedBox(height: 20),
+            _buildButton(
+              FontAwesomeIcons.solidUser,
+              'Profil',
+              () {},
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(25),
+                topRight: Radius.circular(25),
+                bottomLeft: Radius.circular(8),
+                bottomRight: Radius.circular(8),
+              ),
             ),
-            const SizedBox(width: 16),
-            Text(
-              label,
-              style: const TextStyle(fontSize: 18, color: Colors.white),
+            _buildButton(
+              FontAwesomeIcons.solidBell,
+              'Notificare',
+              () {},
+              borderRadius: const BorderRadius.all(Radius.circular(8)),
+            ),
+            _buildButton(
+              FontAwesomeIcons.shield,
+              'Privacy',
+              () {},
+              borderRadius: const BorderRadius.all(Radius.circular(8)),
+            ),
+            _buildButton(
+              FontAwesomeIcons.globe,
+              'Language',
+              () {},
+              borderRadius: const BorderRadius.all(Radius.circular(8)),
+            ),
+            _buildButton(
+              FontAwesomeIcons.solidCircleQuestion,
+              'Help',
+              () {},
+              borderRadius: const BorderRadius.all(Radius.circular(8)),
+            ),
+            _buildButton(
+              FontAwesomeIcons.circleInfo,
+              'About',
+              () {},
+              borderRadius: const BorderRadius.all(Radius.circular(8)),
+            ),
+            _buildButton(
+              FontAwesomeIcons.retweet,
+              'Updates',
+              () {},
+              borderRadius: const BorderRadius.all(Radius.circular(8)),
+            ),
+            _buildButton(
+              FontAwesomeIcons.rightFromBracket,
+              'Sign Out',
+              () {
+                _signOut(context);
+              },
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(8),
+                topRight: Radius.circular(8),
+                bottomLeft: Radius.circular(25),
+                bottomRight: Radius.circular(25),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Text(
+                      "Version $_version (Build $_buildNumber)",
+                      style: const TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      "© 2025 Prosoft.plus",
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
       ),
-    ),
-  );
-}
+      backgroundColor: Colors.black,
+    );
+  }
+
+  Widget _buildButton(
+    IconData icon,
+    String label,
+    VoidCallback onPressed, {
+    required BorderRadius borderRadius,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 10.0),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: borderRadius,
+          gradient: const RadialGradient(
+            colors: [
+              Color(0x408E8E8E),
+              Colors.transparent,
+            ],
+            focal: Alignment.topRight,
+            radius: 10,
+            stops: [-20, 8],
+          ),
+        ),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.transparent, // Button background color
+            padding:
+                const EdgeInsets.symmetric(vertical: 0.0, horizontal: 20.0),
+            minimumSize: const Size.fromHeight(60),
+            shape: RoundedRectangleBorder(
+              borderRadius: borderRadius,
+            ),
+          ),
+          onPressed: onPressed,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: 25,
+                child: FaIcon(icon, size: 25, color: const Color(0xFFe2861d)),
+              ),
+              const SizedBox(width: 16),
+              Text(
+                label,
+                style: const TextStyle(fontSize: 18, color: Colors.white),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

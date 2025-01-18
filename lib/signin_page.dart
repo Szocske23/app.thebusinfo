@@ -54,7 +54,6 @@ class _SignInPageState extends State<SignInPage> {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => const HomeScreen()),
           );
-        
         } else {
           setState(() {
             _errorMessage = 'Missing tokens in the response';
@@ -94,113 +93,191 @@ class _SignInPageState extends State<SignInPage> {
           ),
         ),
       ),
-      backgroundColor: Colors.transparent,
-      body:Container(
-      // Add gradient background here
-      decoration: const BoxDecoration(
-        gradient: RadialGradient(
-          colors: [
-            Color.fromARGB(182, 222, 119, 1), 
-            Color(0x10000000),
-            Color(0x10000000),
-          ],
-          focal: FractionalOffset.bottomLeft,
-          radius: 3.8,
-          stops: [0.0, 0.4, 0.8],
-          tileMode: TileMode.clamp,
-          focalRadius: 0.2
-        ),
-      ),
-      child: Padding(
+      backgroundColor: Colors.black,
+      body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             const SizedBox(height: 40),
-            Image.asset(
-              'assets/logo_trsp.png',
-              width: 500,
+            Container(
+              height: 120,
+              decoration: const BoxDecoration(
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(25),
+                    topRight: Radius.circular(25),
+                    bottomLeft: Radius.circular(8),
+                    bottomRight: Radius.circular(8)),
+                gradient: RadialGradient(
+                  colors: [
+                    Color(0x408E8E8E),
+                    Colors.transparent,
+                  ],
+                  focal: Alignment.bottomCenter,
+                  radius: 3,
+                  stops: [-4.0, 1.0], // Corrected stops (must be within [0, 1])
+                ),
+              ),
+              child: Image.asset(
+                'assets/logo_trsp.png',
+                width: 500,
+              ),
             ),
-            const SizedBox(height: 40),
             if (_errorMessage != null)
-              Text(
-                _errorMessage!,
-                style: const TextStyle(color: Colors.red),
-              ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _emailController,
-              style: const TextStyle(color: Colors.white, fontSize: 16),
-              autocorrect: false,
-              autofillHints: const [AutofillHints.email], 
-              textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                floatingLabelStyle: TextStyle(color: Color(0xFFE2861D)),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFFE2861D)),
-                  borderRadius: BorderRadius.all(Radius.circular(25)),
+              Container(
+                margin: const EdgeInsets.only(top: 4),
+                height: 60,
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(8),
+                      topRight: Radius.circular(8),
+                      bottomLeft: Radius.circular(8),
+                      bottomRight: Radius.circular(8)),
+                  gradient: RadialGradient(
+                    colors: [
+                      Color(0x408E8E8E),
+                      Color(0x40c51b29),
+                    ],
+                    focal: Alignment.bottomCenter,
+                    radius: 3,
+                    stops: [
+                      -4.0,
+                      1.0
+                    ], // Corrected stops (must be within [0, 1])
+                  ),
                 ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(25)),
+                child: Center(
+                  child: Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: Colors.red),
+                  ),
                 ),
-                contentPadding:
-                    EdgeInsets.symmetric(vertical: 20, horizontal: 16),
               ),
-              keyboardType: TextInputType.emailAddress,
+            const SizedBox(height: 4),
+            Container(
+              height: 60,
+              decoration: const BoxDecoration(
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(8),
+                    topRight: Radius.circular(8),
+                    bottomLeft: Radius.circular(8),
+                    bottomRight: Radius.circular(8)),
+                gradient: RadialGradient(
+                  colors: [
+                    Color(0x408E8E8E),
+                    Colors.transparent,
+                  ],
+                  focal: Alignment.bottomCenter,
+                  radius: 8,
+                  stops: [0.0, 1.0], // Corrected stops (must be within [0, 1])
+                ),
+              ),
+              child: TextField(
+                controller: _emailController,
+                style: const TextStyle(color: Colors.white, fontSize: 16),
+                autocorrect: false,
+                autofillHints: const [AutofillHints.email],
+                textInputAction: TextInputAction.next,
+                decoration: const InputDecoration(
+                  labelText: 'Email',
+                  floatingLabelStyle: TextStyle(color: Color(0xFFE2861D)),
+                  enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.transparent)),
+                  focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.transparent)),
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                ),
+                keyboardType: TextInputType.emailAddress,
+              ),
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _passwordController,
-              style: const TextStyle(color: Colors.white, fontSize: 16),
-              autocorrect: false,
-              autofillHints: const [AutofillHints.password],
-              textInputAction: TextInputAction.done,
-              onEditingComplete: _isLoading
-                      ? null
-                      : () {
-                          final email = _emailController.text.trim();
-                          final password = _passwordController.text.trim();
+            const SizedBox(height: 4),
+            Container(
+              height: 60,
+              decoration: const BoxDecoration(
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(8),
+                    topRight: Radius.circular(8),
+                    bottomLeft: Radius.circular(8),
+                    bottomRight: Radius.circular(8)),
+                gradient: RadialGradient(
+                  colors: [
+                    Color(0x408E8E8E),
+                    Colors.transparent,
+                  ],
+                  focal: Alignment.bottomCenter,
+                  radius: 8,
+                  stops: [0.0, 1.0], // Corrected stops (must be within [0, 1])
+                ),
+              ),
+              child: TextField(
+                controller: _passwordController,
+                style: const TextStyle(color: Colors.white, fontSize: 16),
+                autocorrect: false,
+                autofillHints: const [AutofillHints.password],
+                textInputAction: TextInputAction.done,
+                onEditingComplete: _isLoading
+                    ? null
+                    : () {
+                        final email = _emailController.text.trim();
+                        final password = _passwordController.text.trim();
 
-                          if (email.isEmpty || password.isEmpty) {
-                            setState(() {
-                              _errorMessage =
-                                  'Email and password are required.';
-                            });
-                          } else {
-                            _signIn(email, password);
-                          }
-                        },
-              decoration: const InputDecoration(
-                labelText: 'Password',
-                floatingLabelStyle: TextStyle(color: Color(0xFFE2861D)),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFFE2861D)),
-                  borderRadius: BorderRadius.all(Radius.circular(25)),
+                        if (email.isEmpty || password.isEmpty) {
+                          setState(() {
+                            _errorMessage = 'Email and password are required.';
+                          });
+                        } else {
+                          _signIn(email, password);
+                        }
+                      },
+                decoration: const InputDecoration(
+                  labelText: 'Password',
+                  floatingLabelStyle: TextStyle(color: Color(0xFFE2861D)),
+                  enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.transparent)),
+                  focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.transparent)),
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 20, horizontal: 16),
                 ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(25)),
-                ),
-                contentPadding:
-                    EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                obscureText: true,
               ),
-              obscureText: true,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 4),
             SizedBox(
               width: double.infinity, // Full width of the parent container
               height: 60, // Button height
               child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(25),
-                  color:  Colors.black,
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(8),
+                      topRight: Radius.circular(8),
+                      bottomLeft: Radius.circular(25),
+                      bottomRight: Radius.circular(25)),
+                  gradient: RadialGradient(
+                    colors: [
+                      Color(0x408E8E8E),
+                      Colors.transparent,
+                    ],
+                    focal: Alignment.bottomCenter,
+                    radius: 8,
+                    stops: [
+                      0.0,
+                      1.0
+                    ], // Corrected stops (must be within [0, 1])
+                  ),
                 ),
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.transparent,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(8),
+                          topRight: Radius.circular(8),
+                          bottomLeft: Radius.circular(25),
+                          bottomRight: Radius.circular(25)),
                     ),
                   ),
                   onPressed: _isLoading
@@ -243,7 +320,6 @@ class _SignInPageState extends State<SignInPage> {
             ),
           ],
         ),
-      ),
       ),
     );
   }
