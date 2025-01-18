@@ -114,7 +114,7 @@ class _SignInPageState extends State<SignInPage> {
                     Colors.transparent,
                   ],
                   focal: Alignment.bottomCenter,
-                  radius: 3,
+                  radius: 30,
                   stops: [-4.0, 1.0], // Corrected stops (must be within [0, 1])
                 ),
               ),
@@ -140,7 +140,7 @@ class _SignInPageState extends State<SignInPage> {
                       Color(0x40c51b29),
                     ],
                     focal: Alignment.bottomCenter,
-                    radius: 3,
+                    radius: 30,
                     stops: [
                       -4.0,
                       1.0
@@ -169,19 +169,23 @@ class _SignInPageState extends State<SignInPage> {
                     Colors.transparent,
                   ],
                   focal: Alignment.bottomCenter,
-                  radius: 8,
+                  radius: 30,
+              
                   stops: [0.0, 1.0], // Corrected stops (must be within [0, 1])
                 ),
               ),
               child: TextField(
+                
                 controller: _emailController,
                 style: const TextStyle(color: Colors.white, fontSize: 16),
                 autocorrect: false,
                 autofillHints: const [AutofillHints.email],
                 textInputAction: TextInputAction.next,
                 decoration: const InputDecoration(
+                  
                   labelText: 'Email',
                   floatingLabelStyle: TextStyle(color: Color(0xFFE2861D)),
+                  labelStyle: TextStyle(color: Colors.white60),
                   enabledBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.transparent)),
                   focusedBorder: UnderlineInputBorder(
@@ -190,6 +194,7 @@ class _SignInPageState extends State<SignInPage> {
                       EdgeInsets.symmetric(vertical: 20, horizontal: 16),
                 ),
                 keyboardType: TextInputType.emailAddress,
+                keyboardAppearance: Brightness.dark,
               ),
             ),
             const SizedBox(height: 4),
@@ -207,7 +212,7 @@ class _SignInPageState extends State<SignInPage> {
                     Colors.transparent,
                   ],
                   focal: Alignment.bottomCenter,
-                  radius: 8,
+                  radius: 30,
                   stops: [0.0, 1.0], // Corrected stops (must be within [0, 1])
                 ),
               ),
@@ -234,6 +239,7 @@ class _SignInPageState extends State<SignInPage> {
                 decoration: const InputDecoration(
                   labelText: 'Password',
                   floatingLabelStyle: TextStyle(color: Color(0xFFE2861D)),
+                  labelStyle: TextStyle(color: Colors.white60),
                   enabledBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.transparent)),
                   focusedBorder: UnderlineInputBorder(
@@ -242,6 +248,7 @@ class _SignInPageState extends State<SignInPage> {
                       EdgeInsets.symmetric(vertical: 20, horizontal: 16),
                 ),
                 obscureText: true,
+                keyboardAppearance: Brightness.dark,
               ),
             ),
             const SizedBox(height: 4),
@@ -261,7 +268,7 @@ class _SignInPageState extends State<SignInPage> {
                       Colors.transparent,
                     ],
                     focal: Alignment.bottomCenter,
-                    radius: 8,
+                    radius: 30,
                     stops: [
                       0.0,
                       1.0

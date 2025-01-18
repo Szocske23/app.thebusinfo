@@ -406,6 +406,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         Expanded(
                           child: TextField(
                             style: const TextStyle(color: Colors.white),
+                            keyboardAppearance: Brightness.dark,
                             decoration: const InputDecoration(
                               hintText: 'Search for destination...',
                               hintStyle: TextStyle(color: Colors.grey),

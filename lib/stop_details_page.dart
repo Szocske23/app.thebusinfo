@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 
@@ -90,9 +92,45 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
               child: CircularProgressIndicator()) // Show loader while loading
           : Stack(
               children: [
+                MapWidget(
+                  styleUri:
+                      "mapbox://styles/szocske23/cm62gk5mp003401s71wfb57jg",
+                  onMapCreated: (MapboxMap controller) {
+                    mapboxMap = controller;
+                    _onMapCreated(controller);
+                  },
+                  cameraOptions: CameraOptions(
+                    center: Point(
+                      coordinates: Position(longitude, latitude),
+                    ),
+                    zoom: 16,
+                    pitch: 40,
+                    padding:
+                        MbxEdgeInsets(top: 0, left: 0, bottom: 420, right: 0),
+                  ),
+                ),
                 // Stop name
+                
                 Positioned(
-                  top: 65,
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.only(topLeft: Radius.circular(45),topRight: Radius.circular(45)),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 6.0, sigmaY: 6.0),
+                      child: Container(
+                        height: 550,
+                        decoration: const BoxDecoration(color: Colors.black45,
+                        borderRadius: BorderRadius.only(topLeft: Radius.circular(45),topRight: Radius.circular(45))
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                Positioned(
+                  bottom: 505,
                   left: 0,
                   right: 0,
                   child: Center(
@@ -107,63 +145,34 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
                   ),
                 ),
 
-                // Map
                 Positioned(
-                  top: 100,
-                  left: 0,
-                  right: 0,
-                  child: Container(
-                    padding: const EdgeInsets.all(10.0),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(25),
-                      child: Container(
-                        height: 200,
-                        decoration: BoxDecoration(
-                          color: Colors.transparent,
-                          borderRadius: BorderRadius.circular(25),
-                        ),
-                        child: MapWidget(
-                          styleUri:
-                              "mapbox://styles/szocske23/cm4brvrj900pb01r1eq8z9spy",
-                          onMapCreated: (MapboxMap controller) {
-                            mapboxMap = controller;
-                            _onMapCreated(controller);
-                          },
-                          cameraOptions: CameraOptions(
-                            center: Point(
-                              coordinates: Position(longitude, latitude),
+                  bottom: 30,
+                  left: 10,
+                  right: 10,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                          height: 60,
+                          decoration: const BoxDecoration(
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(25),
+                                topRight: Radius.circular(25),
+                                bottomLeft: Radius.circular(8),
+                                bottomRight: Radius.circular(8)),
+                            gradient: RadialGradient(
+                              colors: [
+                                Colors.black,
+                                Colors.transparent,
+                              ],
+                              focal: Alignment.topRight,
+                              radius: 30,
+                              stops: [-20, 8],
                             ),
-                            zoom: 16,
                           ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                Positioned(
-                    top: 330,
-                    left: 10,
-                    right: 10,
-                    child: Container(
-                        height: 400,
-                        padding:
-                            const EdgeInsets.only(left: 25, right: 25, top: 20),
-                        decoration: BoxDecoration(
-                          color: Colors.black,
-                          borderRadius: BorderRadius.circular(25),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color(0x15e2861d),
-                              spreadRadius: 1,
-                              blurRadius: 25,
-                              offset: Offset(0, 0),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          children: [
-                            const Row(
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 20),
+                            child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
@@ -174,71 +183,84 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                Text(
-                                  "ETA",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                                SizedBox(
+                                    width: 100,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          "ETA",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              "info",
+                                              style: TextStyle(
+                                                color: Colors.grey,
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                            Text(
+                                              "buy",
+                                              style: TextStyle(
+                                                color: Colors.grey,
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                          ],
+                                        )
+                                      ],
+                                    )),
                               ],
                             ),
-                            const Divider(
-                              color: Color(
-                                  0xFFe2861d), // Change to your desired color
-                              thickness:
-                                  1.4, // Adjust the thickness of the divider
-                            ),
-                            Expanded(
-                              child: services.isEmpty
-                                  ? const Center(
-                                      child: Text(
-                                        "No services available",
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 16),
-                                      ),
-                                    )
-                                  : SingleChildScrollView(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: List.generate(services.length,
-                                            (index) {
-                                          final service = services[index];
-                                          return Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                vertical: 8.0),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Text(
-                                                  service['service_name'] ??
-                                                      'Unknown Service',
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 16,
-                                                  ),
-                                                ),
-                                                Text(
-                                                  _formatTimeAtStop(
-                                                      service['time_at_stop']),
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 16,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                        }),
-                                      ),
-                                    ),
+                          )),
+                      services.isEmpty
+                          ? const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 20.0),
+                              child: Center(
+                                child: Text(
+                                  "No services available",
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 16),
+                                ),
+                              ),
                             )
-                          ],
-                        ))),
+                          : ClipRRect(
+                              borderRadius: const BorderRadius.only(
+                                bottomLeft: Radius.circular(25),
+                                bottomRight: Radius.circular(25),
+                                topLeft: Radius.circular(8),
+                                topRight: Radius.circular(8),
+                              ),
+                              child: SizedBox(
+                                height: 400, // Constrain the height
+                                child: SingleChildScrollView(
+                                  child: Column(
+                                    children: [
+                                      ...services.map((service) {
+                                        return _buildServiceCard(
+                                          service['service_name'] ??
+                                              'Unknown Service',
+                                          _formatTimeAtStop(
+                                              service['time_at_stop']),
+                                        );
+                                      }).toList(),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                    ],
+                  ),
+                ),
               ],
             ),
     );
@@ -253,4 +275,81 @@ String _formatTimeAtStop(String? timeAtStop) {
   } catch (e) {
     return "Invalid time";
   }
+}
+
+Widget _buildServiceCard(String serviceName, String eta) {
+  return Padding(
+    padding: const EdgeInsets.only(top: 4.0),
+    child: Row(
+      children: [
+        // Main service card container
+        Expanded(
+          child: Container(
+            height: 60,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              gradient: const RadialGradient(
+                colors: [
+                  Colors.black,
+                  Colors.transparent,
+                ],
+                focal: Alignment.topRight,
+                radius: 30, // Adjust radius as needed
+              ),
+            ),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                padding: const EdgeInsets.symmetric(
+                    vertical: 16.0, horizontal: 20.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () {
+                // Handle button press
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    serviceName,
+                    style: const TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                  Text(
+                    eta,
+                    style: const TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 4), // Spacing between the two containers
+        // Secondary container
+        Container(
+          width: 60,
+          height: 60, // Adjust height as needed
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            gradient: const RadialGradient(
+              colors: [
+                Colors.black,
+                Colors.transparent,
+              ],
+              focal: Alignment.topLeft,
+              radius: 30, // Adjust radius as needed
+            ),
+          ),
+          child: const Center(
+            child: FaIcon(
+              FontAwesomeIcons.cartShopping,
+              size: 16,
+              color: Color(0xFFE2861D),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }
