@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
+// Import LatLng
 
 class StopDetailsPage extends StatefulWidget {
   final int stopId;
@@ -38,6 +39,7 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
           stopName = data['stop_name'];
           routes = data['routes']; // Store the routes data
           services = data['services']; // Store the services data
+
           isLoading = false;
         });
         print('Stop Details: $data'); // Log response for debugging
@@ -66,6 +68,77 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
     pointAnnotationManager?.create(pointAnnotationOptions);
   }
 
+  Future<void> _addRouteLines() async {
+    
+
+    try {
+      // Use the already available 'routes' data instead of fetching it again
+      if (routes.isNotEmpty) {
+        // Extract the geojson coordinates from the first route
+        final geoJson =
+            routes[0]['geojson']; // Assuming you have at least one route
+        final coordinates =
+            geoJson[0]['coordinates']; // Extracting the coordinates array
+
+        // Convert coordinates to LatLng format for Mapbox
+        final routeCoordinates = coordinates.map((coord) {
+          return [
+            coord[0],
+            coord[1]
+          ]; // Convert [longitude, latitude] to [latitude, longitude]
+        }).toList();
+
+        // Prepare the GeoJSON for the route lines
+        final routesGeoJson = {
+          "type": "FeatureCollection",
+          "features": [
+            {
+              "type": "Feature",
+              "geometry": {
+                "type": "LineString",
+                "coordinates": routeCoordinates,
+              },
+              "properties": {
+                "name": routes[0]['name'], // Route name (or other property)
+                "description": routes[0]
+                    ['description'], // Route description (if needed)
+              },
+            },
+          ],
+        };
+
+        print(routesGeoJson);
+
+        // Add GeoJSON source for the route lines
+        await mapboxMap?.style.addSource(GeoJsonSource(
+          id: 'route-line-source', // Source ID
+          data: json.encode(routesGeoJson),
+        ));
+
+        // Add a layer for route lines
+        await mapboxMap?.style
+            .addLayer(LineLayer(
+          id: 'route-line-layer',
+          sourceId: 'route-line-source',
+          lineColor: 
+              const Color(0xFFE2861D).value, // Green in light mode
+          lineWidth: 8,
+          lineColorExpression: [2,2],
+          lineEmissiveStrength: 1,
+          lineOpacity: 1,
+           
+        ))
+            .catchError((error) {
+          print("Error adding layer: $error");
+        });
+      } else {
+        print('No routes found in the response');
+      }
+    } catch (e) {
+      _showError('Error adding route lines: $e');
+    }
+  }
+
   _onMapCreated(MapboxMap mapboxMap) async {
     this.mapboxMap = mapboxMap;
     pointAnnotationManager =
@@ -74,7 +147,13 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
     // Add the stop marker after map creation
     if (!isLoading) {
       addStopMarker();
+      _addRouteLines();
     }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -110,20 +189,24 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
                   ),
                 ),
                 // Stop name
-                
+
                 Positioned(
                   bottom: 0,
                   left: 0,
                   right: 0,
                   child: ClipRRect(
-                    borderRadius: const BorderRadius.only(topLeft: Radius.circular(45),topRight: Radius.circular(45)),
+                    borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(45),
+                        topRight: Radius.circular(45)),
                     child: BackdropFilter(
                       filter: ImageFilter.blur(sigmaX: 6.0, sigmaY: 6.0),
                       child: Container(
                         height: 550,
-                        decoration: const BoxDecoration(color: Colors.black45,
-                        borderRadius: BorderRadius.only(topLeft: Radius.circular(45),topRight: Radius.circular(45))
-                        ),
+                        decoration: const BoxDecoration(
+                            color: Colors.black45,
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(45),
+                                topRight: Radius.circular(45))),
                       ),
                     ),
                   ),
