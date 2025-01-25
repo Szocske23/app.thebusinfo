@@ -216,6 +216,12 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Stația $stopName', style: const TextStyle(color: Colors.white)),
+
+        backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
       backgroundColor: Colors.black,
       body: isLoading
           ? const Center(
@@ -233,10 +239,10 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
                     center: Point(
                       coordinates: Position(longitude, latitude),
                     ),
-                    zoom: 16,
+                    zoom: 16.6,
                     pitch: 40,
                     padding:
-                        MbxEdgeInsets(top: 0, left: 0, bottom: 420, right: 0),
+                        MbxEdgeInsets(top: 0, left: 0, bottom: 360, right: 0),
                   ),
                 ),
                 // Stop name
@@ -252,7 +258,7 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
                     child: BackdropFilter(
                       filter: ImageFilter.blur(sigmaX: 6.0, sigmaY: 6.0),
                       child: Container(
-                        height: 550,
+                        height: 400,
                         decoration: const BoxDecoration(
                             color: Colors.black45,
                             borderRadius: BorderRadius.only(
@@ -263,21 +269,7 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
                   ),
                 ),
 
-                Positioned(
-                  bottom: 505,
-                  left: 0,
-                  right: 0,
-                  child: Center(
-                    child: Text(
-                      "Stația $stopName",
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
+                
 
                 Positioned(
                   bottom: 30,
@@ -290,8 +282,8 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
                           height: 60,
                           decoration: const BoxDecoration(
                             borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(25),
-                                topRight: Radius.circular(25),
+                                topLeft: Radius.circular(35),
+                                topRight: Radius.circular(35),
                                 bottomLeft: Radius.circular(8),
                                 bottomRight: Radius.circular(8)),
                             gradient: RadialGradient(
@@ -310,7 +302,7 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  "Services",
+                                  "Departures",
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
@@ -357,16 +349,44 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
                             ),
                           )),
                       services.isEmpty
-                          ? const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 20.0),
-                              child: Center(
-                                child: Text(
-                                  "No services available",
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 16),
+                          ? Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 4.0),
+                              child: Container(
+                                height: 292,
+                                decoration: const BoxDecoration(
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(8),
+                                    topRight: Radius.circular(8),
+                                    bottomLeft: Radius.circular(25),
+                                    bottomRight: Radius.circular(25),
+                                  ),
+                                  gradient: RadialGradient(
+                              colors: [
+                                Colors.black,
+                                Colors.transparent,
+                              ],
+                              focal: Alignment.topRight,
+                              radius: 12,
+                              stops: [-20, 8],
+                            ),
                                 ),
+                                child:  const Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                  "There are no rides scheduled",
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 18,fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(height: 20),
+                                Icon( FontAwesomeIcons.calendarXmark, color: Colors.white54, size: 80,),
+                                  ],
+                                )
+                                
                               ),
-                            )
+                            ),
+                          )
                           : ClipRRect(
                               borderRadius: const BorderRadius.only(
                                 bottomLeft: Radius.circular(25),
@@ -375,7 +395,7 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
                                 topRight: Radius.circular(8),
                               ),
                               child: SizedBox(
-                                height: 400, // Constrain the height
+                                height: 300, // Constrain the height
                                 child: SingleChildScrollView(
                                   child: Column(
                                     children: [
