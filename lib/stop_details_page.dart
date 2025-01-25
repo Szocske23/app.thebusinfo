@@ -400,8 +400,9 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
 String _formatTimeAtStop(String? timeAtStop) {
   if (timeAtStop == null) return "N/A";
   try {
-    final dateTime = DateTime.parse(timeAtStop);
-    return "${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}";
+    final dateTime = DateTime.parse(timeAtStop).toUtc(); // Parse as UTC
+    final localDateTime = dateTime.add(const Duration(hours: 2)); // Convert to EET manually
+    return "${localDateTime.hour}:${localDateTime.minute.toString().padLeft(2, '0')}";
   } catch (e) {
     return "Invalid time";
   }
