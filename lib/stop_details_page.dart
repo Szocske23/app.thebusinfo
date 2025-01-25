@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:ui';
+import 'package:app_thebusinfo/service_details_page.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:timezone/timezone.dart' as tz;
-import 'package:timezone/data/latest.dart' as tzdata;
+
+
 
 // Import LatLng
 
@@ -383,6 +385,8 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
                                               'Unknown Service',
                                           _formatTimeAtStop(
                                               service['time_at_stop']),
+                                          service['service_id'],
+                                          context,
                                         );
                                       }).toList(),
                                     ],
@@ -411,7 +415,7 @@ String _formatTimeAtStop(String? timeAtStop) {
   }
 }
 
-Widget _buildServiceCard(String serviceName, String eta) {
+Widget _buildServiceCard(String serviceName, String eta, int serviceId, BuildContext context) {
   return Padding(
     padding: const EdgeInsets.only(top: 4.0),
     child: Row(
@@ -441,7 +445,7 @@ Widget _buildServiceCard(String serviceName, String eta) {
                 ),
               ),
               onPressed: () {
-                // Handle button press
+                // Handle button press for the main card (if needed)
               },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -460,26 +464,37 @@ Widget _buildServiceCard(String serviceName, String eta) {
           ),
         ),
         const SizedBox(width: 4), // Spacing between the two containers
-        // Secondary container
-        Container(
-          width: 60,
-          height: 60, // Adjust height as needed
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            gradient: const RadialGradient(
-              colors: [
-                Colors.black,
-                Colors.transparent,
-              ],
-              focal: Alignment.topLeft,
-              radius: 30, // Adjust radius as needed
+        // Secondary container (make it clickable)
+        GestureDetector(
+          onTap: () {
+            // Navigate to ServiceDetails page with the serviceId
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ServiceDetails(serviceId: serviceId),
+              ),
+            );
+          },
+          child: Container(
+            width: 60,
+            height: 60, // Adjust height as needed
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              gradient: const RadialGradient(
+                colors: [
+                  Colors.black,
+                  Colors.transparent,
+                ],
+                focal: Alignment.topLeft,
+                radius: 30, // Adjust radius as needed
+              ),
             ),
-          ),
-          child: const Center(
-            child: FaIcon(
-              FontAwesomeIcons.cartShopping,
-              size: 16,
-              color: Color(0xFFE2861D),
+            child: const Center(
+              child: FaIcon(
+                FontAwesomeIcons.cartShopping,
+                size: 16,
+                color: Color(0xFFE2861D),
+              ),
             ),
           ),
         ),
