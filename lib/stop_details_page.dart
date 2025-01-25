@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
+import 'package:timezone/timezone.dart' as tz;
+import 'package:timezone/data/latest.dart' as tzdata;
 
 // Import LatLng
 
@@ -400,8 +402,9 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
 String _formatTimeAtStop(String? timeAtStop) {
   if (timeAtStop == null) return "N/A";
   try {
-    final dateTime = DateTime.parse(timeAtStop).toUtc(); // Parse as UTC
-    final localDateTime = dateTime.add(const Duration(hours: 2)); // Convert to EET manually
+    final dateTime = DateTime.parse(timeAtStop); // Parse as UTC
+    final location = tz.getLocation('Europe/Bucharest'); // Get Bucharest timezone
+    final localDateTime = tz.TZDateTime.from(dateTime, location); // Convert to local time
     return "${localDateTime.hour}:${localDateTime.minute.toString().padLeft(2, '0')}";
   } catch (e) {
     return "Invalid time";

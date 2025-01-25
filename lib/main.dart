@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import '/home_screen.dart';
 import 'no_connection_screen.dart';
 import 'services/server_health_check.dart';
+import 'package:timezone/data/latest.dart' as tzData;
+import 'package:timezone/timezone.dart' as tz;
 
 void main() {
+  // Initialize the timezone database
+  tzData.initializeTimeZones();
   runApp(const MyApp());
 }
 
