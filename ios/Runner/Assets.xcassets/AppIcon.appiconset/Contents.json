@@ -1,31 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "light-02.png",
-      "idiom" : "universal",
-      "platform" : "ios",
-      "size" : "1024x1024"
-    },
-    {
-      "appearances" : [
-        {
-          "appearance" : "luminosity",
-          "value" : "dark"
-        }
-      ],
-      "filename" : "dark-02.png",
-      "idiom" : "universal",
-      "platform" : "ios",
-      "size" : "1024x1024"
-    },
-    {
-      "appearances" : [
-        {
-          "appearance" : "luminosity",
-          "value" : "tinted"
-        }
-      ],
-      "filename" : "tint-02.png",
+      "filename" : "baset2.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
