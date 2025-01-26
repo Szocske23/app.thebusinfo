@@ -27,6 +27,7 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
   bool isLoading = true;
   late double latitude;
   late double longitude;
+  int selectedStopId = 0;
   String stopName = "";
   
   List services = [];
@@ -43,6 +44,7 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
           latitude = double.parse(data['stop_coordinates']['latitude']);
           longitude = double.parse(data['stop_coordinates']['longitude']);
           stopName = data['stop_name'];
+          selectedStopId = data['stop_id'];
           routes = data['routes']; // Store the routes data
           services = data['services']; // Store the services data
 
@@ -407,6 +409,7 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
                                           _formatTimeAtStop(
                                               service['time_at_stop']),
                                           service['service_id'],
+                                          selectedStopId,
                                           context,
                                         );
                                       }).toList(),
@@ -436,7 +439,7 @@ String _formatTimeAtStop(String? timeAtStop) {
   }
 }
 
-Widget _buildServiceCard(String serviceName, String eta, int serviceId, BuildContext context) {
+Widget _buildServiceCard(String serviceName, String eta, int serviceId, int selectedStopId, BuildContext context) {
   return Padding(
     padding: const EdgeInsets.only(top: 4.0),
     child: Row(
@@ -492,7 +495,7 @@ Widget _buildServiceCard(String serviceName, String eta, int serviceId, BuildCon
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ServiceDetails(serviceId: serviceId, ),
+                builder: (context) => ServiceDetails(serviceId: serviceId, stopId: selectedStopId),
               ),
             );
           },
