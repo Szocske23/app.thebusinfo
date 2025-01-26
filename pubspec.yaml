@@ -75,6 +75,7 @@ flutter:
     - assets/last_stop_image.png
     - assets/logo_trsp.png
     - assets/app_logo_trsp.png
+    - assets/landing_screen.jpg
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

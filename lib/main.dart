@@ -72,25 +72,34 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black, // Set the background color to black
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Add your app logo here
-            Image.asset(
-              'assets/logo_trsp.png', // Replace with your actual logo asset path
-              width: 500,
-            ),
-            const SizedBox(height: 400),
-            const CircularProgressIndicator(
-              color: Color(0xFFE2861D),
-            ),
-          ],
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: Stack(
+      children: [
+        // Full-screen background image
+        Positioned.fill(
+          child: Image.asset(
+            'assets/landing_screen.jpg', // Replace with your actual background image asset path
+            fit: BoxFit.cover, // Ensures the image fits the screen properly
+          ),
         ),
-      ),
-    );
-  }
+        // Circular progress indicator positioned at the top center
+        const Positioned(
+          top: 200,
+          left: 0,
+          right: 0,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(
+                color: Color(0xFFE2861D),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
 }
