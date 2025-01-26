@@ -76,139 +76,23 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
     pointAnnotationManager?.create(pointAnnotationOptions);
   }
 
-  List<List<double>> decodePolyline6(String encoded) {
-    List<List<double>> coordinates = [];
-    int index = 0;
-    int lat = 0;
-    int lng = 0;
+  
 
-    while (index < encoded.length) {
-      int shift = 0;
-      int result = 0;
-
-      // Decode latitude
-      while (true) {
-        if (index >= encoded.length) {
-          print('Invalid polyline format: Latitude decoding failed');
-          return [];
-        }
-        int b = encoded.codeUnitAt(index++) - 63;
-        result |= (b & 0x1F) << shift;
-        shift += 5;
-        if (b < 0x20) break;
-      }
-      int deltaLat = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
-      lat += deltaLat;
-
-      shift = 0;
-      result = 0;
-
-      // Decode longitude
-      while (true) {
-        if (index >= encoded.length) {
-          print('Invalid polyline format: Longitude decoding failed');
-          return [];
-        }
-        int b = encoded.codeUnitAt(index++) - 63;
-        result |= (b & 0x1F) << shift;
-        shift += 5;
-        if (b < 0x20) break;
-      }
-      int deltaLng = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
-      lng += deltaLng;
-
-      // Add coordinates to the list (Flipping to [latitude, longitude])
-      coordinates.add([lng / 1e6, lat / 1e6]); // Flip: Latitude first
-    }
-
-    return coordinates;
-  }
-
-  Future<void> _addRouteLines() async {
-    try {
-      if (routes.isNotEmpty) {
-        // Extract the encoded polyline from the first route
-        final encodedPolyline = routes[0]['geojson'][0];
-        final routeName = routes[0]['name'];
-        final routeDescription = routes[0]['description'];
-
-        // Decode the polyline using decodePolyline6
-        List<List<double>> decodedPoints = decodePolyline6(encodedPolyline);
-        print(decodedPoints);
-        if (decodedPoints.isNotEmpty) {
-          // Convert decoded points to the format required by Mapbox
-          List<List<double>> routeCoordinates = decodedPoints;
-
-          // Prepare GeoJSON for the route lines
-          final routesGeoJson = {
-            "type": "FeatureCollection",
-            "features": [
-              {
-                "type": "Feature",
-                "geometry": {
-                  "type": "LineString",
-                  "coordinates": routeCoordinates,
-                },
-                "properties": {
-                  "name": routeName,
-                  "description": routeDescription,
-                },
-              },
-            ],
-          };
-          print(routesGeoJson);
-
-          // Add GeoJSON source for the route lines
-          
-            // Add GeoJSON source for the route lines
-            await mapboxMap?.style.addSource(GeoJsonSource(
-              id: 'route-line-source',
-              data: json.encode(routesGeoJson),
-            ));
-
-            // Add a layer for the route lines
-            await mapboxMap?.style.addLayer(LineLayer(
-              id: 'route-line-layer',
-              sourceId: 'route-line-source',
-              
-              lineColor: const Color(0xFFE2861D).value,
-              lineWidth: 8,
-              lineColorExpression: [2, 2],
-              lineEmissiveStrength: 1,
-              lineOpacity: 1,
-              
-            ));
-
-          
-
-          print('Route line added successfully');
-        } else {
-          print('No coordinates decoded from polyline');
-        }
-      } else {
-        print('No routes found in the response');
-      }
-    } catch (e) {
-      _showError('Error adding route lines: $e');
-    }
-  }
+  
 
   _onMapCreated(MapboxMap mapboxMap) async {
     this.mapboxMap = mapboxMap;
     pointAnnotationManager =
+    
         await mapboxMap.annotations.createPointAnnotationManager();
 
     // Add the stop marker after map creation
     if (!isLoading) {
-      _addRouteLines();
+     
       addStopMarker();
     }
   }
 
-  void _showError(String message) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
-  }
 
   @override
   void initState() {
