@@ -23,6 +23,7 @@ class _ServiceDetailsState extends State<ServiceDetails> {
   late String polyLine;
   late String serviceName;
   late String serviceDescription;
+  PointAnnotationManager? pointAnnotationManager;
 
   @override
   void initState() {
@@ -61,6 +62,44 @@ class _ServiceDetailsState extends State<ServiceDetails> {
       throw Exception('Failed to fetch stop details');
     }
   }
+
+  Future<void> _addStopAnnotation() async {
+    
+      // Prepare GeoJSON data for stops 
+      final stopsGeoJson = {
+        "type": "FeatureCollection",
+        "features": stops.map((stop) {
+          return {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [stop['longitude'], stop['latitude']],
+            },
+            "properties": {
+              "name": stop['stop_name'],
+            },
+          };
+        }).toList(),
+      };
+
+      await mapboxMap?.style.addSource(GeoJsonSource(
+        id: 'stop-cluster-source', // Source ID
+        data: json.encode(stopsGeoJson),
+      ));
+
+      await mapboxMap?.style.addLayer(SymbolLayer(
+        id: 'stop-layer',
+        sourceId: 'stop-cluster-source',
+        iconImage: "mapbox-bus",
+        iconAnchor: IconAnchor.BOTTOM,
+        iconSize: 1,
+        iconAllowOverlap: true,
+      ));
+      print('Anotations: ${stopsGeoJson}');
+    
+  }
+
+
 
   Future<void> _addRouteLines() async {
     try {
@@ -103,6 +142,7 @@ class _ServiceDetailsState extends State<ServiceDetails> {
 
           // Add a layer for the route lines
           await mapboxMap?.style.addLayer(LineLayer(
+
             id: 'route-line-layer',
             sourceId: 'route-line-source',
             lineColor: const Color(0xFFE2861D).value,
@@ -110,6 +150,7 @@ class _ServiceDetailsState extends State<ServiceDetails> {
             lineColorExpression: [2, 2],
             lineEmissiveStrength: 1,
             lineOpacity: 1,
+            
           ));
 
           // Set camera position (center and zoom)
@@ -233,8 +274,12 @@ class _ServiceDetailsState extends State<ServiceDetails> {
   }
 
   _onMapCreated(MapboxMap mapboxMap) async {
+    pointAnnotationManager =
+        await mapboxMap.annotations.createPointAnnotationManager();
+
     if (!isLoading) {
-      _addRouteLines();
+      await _addStopAnnotation();
+      await _addRouteLines();
     }
   }
 
@@ -259,7 +304,7 @@ class _ServiceDetailsState extends State<ServiceDetails> {
               children: [
                 MapWidget(
                   styleUri:
-                      "mapbox://styles/szocske23/cm62gk5mp003401s71wfb57jg",
+                      "mapbox://styles/szocske23/cm4brvrj900pb01r1eq8z9spy",
                   onMapCreated: (MapboxMap controller) {
                     mapboxMap = controller;
                     _onMapCreated(controller);
