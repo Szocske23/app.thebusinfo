@@ -28,6 +28,7 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
   late double latitude;
   late double longitude;
   String stopName = "";
+  
   List services = [];
 
   // Fetch stop details from the API
@@ -491,7 +492,7 @@ Widget _buildServiceCard(String serviceName, String eta, int serviceId, BuildCon
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ServiceDetails(serviceId: serviceId),
+                builder: (context) => ServiceDetails(serviceId: serviceId, ),
               ),
             );
           },
