@@ -7,8 +7,6 @@ import 'package:http/http.dart' as http;
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:timezone/timezone.dart' as tz;
 
-
-
 // Import LatLng
 
 class StopDetailsPage extends StatefulWidget {
@@ -29,7 +27,7 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
   late double longitude;
   int selectedStopId = 0;
   String stopName = "";
-  
+
   List services = [];
 
   // Fetch stop details from the API
@@ -76,23 +74,16 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
     pointAnnotationManager?.create(pointAnnotationOptions);
   }
 
-  
-
-  
-
   _onMapCreated(MapboxMap mapboxMap) async {
     this.mapboxMap = mapboxMap;
     pointAnnotationManager =
-    
         await mapboxMap.annotations.createPointAnnotationManager();
 
     // Add the stop marker after map creation
     if (!isLoading) {
-     
       addStopMarker();
     }
   }
-
 
   @override
   void initState() {
@@ -104,8 +95,8 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Stația $stopName', style: const TextStyle(color: Colors.white)),
-
+        title: Text('Stația $stopName',
+            style: const TextStyle(color: Colors.white)),
         backgroundColor: Colors.black,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
@@ -135,30 +126,6 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
                 // Stop name
 
                 Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(45),
-                        topRight: Radius.circular(45)),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 6.0, sigmaY: 6.0),
-                      child: Container(
-                        height: 400,
-                        decoration: const BoxDecoration(
-                            color: Colors.black45,
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(45),
-                                topRight: Radius.circular(45))),
-                      ),
-                    ),
-                  ),
-                ),
-
-                
-
-                Positioned(
                   bottom: 30,
                   left: 10,
                   right: 10,
@@ -166,23 +133,14 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                          height: 60,
+                          height: 90,
                           decoration: const BoxDecoration(
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(35),
-                                topRight: Radius.circular(35),
-                                bottomLeft: Radius.circular(8),
-                                bottomRight: Radius.circular(8)),
-                            gradient: RadialGradient(
-                              colors: [
-                                Colors.black,
-                                Colors.transparent,
-                              ],
-                              focal: Alignment.topRight,
-                              radius: 30,
-                              stops: [-20, 8],
-                            ),
-                          ),
+                              borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(25),
+                                  topRight: Radius.circular(25),
+                                  bottomLeft: Radius.circular(25),
+                                  bottomRight: Radius.circular(25)),
+                              color: Colors.black),
                           child: const Padding(
                             padding: EdgeInsets.symmetric(horizontal: 20),
                             child: Row(
@@ -237,51 +195,43 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
                           )),
                       services.isEmpty
                           ? Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 4.0),
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 4.0),
                               child: Container(
-                                height: 292,
+                                height: 90,
                                 decoration: const BoxDecoration(
                                   borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(8),
-                                    topRight: Radius.circular(8),
+                                    topLeft: Radius.circular(25),
+                                    topRight: Radius.circular(25),
                                     bottomLeft: Radius.circular(25),
                                     bottomRight: Radius.circular(25),
                                   ),
-                                  gradient: RadialGradient(
-                              colors: [
-                                Colors.black,
-                                Colors.transparent,
-                              ],
-                              focal: Alignment.topRight,
-                              radius: 12,
-                              stops: [-20, 8],
-                            ),
+                                  color: Colors.black,
                                 ),
-                                child:  const Center(
-                                child: Column(
+                                child: const Center(
+                                    child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
+                                    Icon(
+                                      FontAwesomeIcons.calendarXmark,
+                                      color: Colors.white54,
+                                      size: 35,
+                                    ),
+                                    SizedBox(
+                                      height: 10,
+                                    ),
                                     Text(
-                                  "There are no rides scheduled",
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 18,fontWeight: FontWeight.bold),
-                                ),
-                                SizedBox(height: 20),
-                                Icon( FontAwesomeIcons.calendarXmark, color: Colors.white54, size: 80,),
+                                      "There are no rides scheduled",
+                                      style: TextStyle(
+                                          color: Colors.grey,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.normal),
+                                    ),
                                   ],
-                                )
-                                
+                                )),
                               ),
-                            ),
-                          )
-                          : ClipRRect(
-                              borderRadius: const BorderRadius.only(
-                                bottomLeft: Radius.circular(25),
-                                bottomRight: Radius.circular(25),
-                                topLeft: Radius.circular(8),
-                                topRight: Radius.circular(8),
-                              ),
-                              child: SizedBox(
+                            )
+                          :  SizedBox(
                                 height: 300, // Constrain the height
                                 child: SingleChildScrollView(
                                   child: Column(
@@ -301,7 +251,7 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
                                   ),
                                 ),
                               ),
-                            ),
+                            
                     ],
                   ),
                 ),
@@ -315,17 +265,20 @@ String _formatTimeAtStop(String? timeAtStop) {
   if (timeAtStop == null) return "N/A";
   try {
     final dateTime = DateTime.parse(timeAtStop); // Parse as UTC
-    final location = tz.getLocation('Europe/Bucharest'); // Get Bucharest timezone
-    final localDateTime = tz.TZDateTime.from(dateTime, location); // Convert to local time
+    final location =
+        tz.getLocation('Europe/Bucharest'); // Get Bucharest timezone
+    final localDateTime =
+        tz.TZDateTime.from(dateTime, location); // Convert to local time
     return "${localDateTime.hour}:${localDateTime.minute.toString().padLeft(2, '0')}";
   } catch (e) {
     return "Invalid time";
   }
 }
 
-Widget _buildServiceCard(String serviceName, String eta, int serviceId, int selectedStopId, BuildContext context) {
+Widget _buildServiceCard(String serviceName, String eta, int serviceId,
+    int selectedStopId, BuildContext context) {
   return Padding(
-    padding: const EdgeInsets.only(top: 4.0),
+    padding: const EdgeInsets.only(top: 10.0),
     child: Row(
       children: [
         // Main service card container
@@ -333,15 +286,8 @@ Widget _buildServiceCard(String serviceName, String eta, int serviceId, int sele
           child: Container(
             height: 60,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              gradient: const RadialGradient(
-                colors: [
-                  Colors.black,
-                  Colors.transparent,
-                ],
-                focal: Alignment.topRight,
-                radius: 30, // Adjust radius as needed
-              ),
+              borderRadius: BorderRadius.circular(25),
+              color: Colors.black,
             ),
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -349,11 +295,18 @@ Widget _buildServiceCard(String serviceName, String eta, int serviceId, int sele
                 padding: const EdgeInsets.symmetric(
                     vertical: 16.0, horizontal: 20.0),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(25),
                 ),
               ),
               onPressed: () {
                 // Handle button press for the main card (if needed)
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ServiceDetails(
+                        serviceId: serviceId, stopId: selectedStopId),
+                  ),
+                );
               },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -362,50 +315,30 @@ Widget _buildServiceCard(String serviceName, String eta, int serviceId, int sele
                     serviceName,
                     style: const TextStyle(fontSize: 16, color: Colors.white),
                   ),
-                  Text(
-                    eta,
-                    style: const TextStyle(fontSize: 16, color: Colors.white),
-                  ),
+                  SizedBox(
+                      width: 100,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            eta,
+                            style: const TextStyle(
+                                fontSize: 16, color: Colors.white),
+                          ),
+                          const Icon(
+                            FontAwesomeIcons.cartShopping,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                        ],
+                      )),
                 ],
               ),
             ),
           ),
         ),
-        const SizedBox(width: 4), // Spacing between the two containers
+
         // Secondary container (make it clickable)
-        GestureDetector(
-          onTap: () {
-            // Navigate to ServiceDetails page with the serviceId
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ServiceDetails(serviceId: serviceId, stopId: selectedStopId),
-              ),
-            );
-          },
-          child: Container(
-            width: 60,
-            height: 60, // Adjust height as needed
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              gradient: const RadialGradient(
-                colors: [
-                  Colors.black,
-                  Colors.transparent,
-                ],
-                focal: Alignment.topLeft,
-                radius: 30, // Adjust radius as needed
-              ),
-            ),
-            child: const Center(
-              child: FaIcon(
-                FontAwesomeIcons.cartShopping,
-                size: 16,
-                color: Color(0xFFE2861D),
-              ),
-            ),
-          ),
-        ),
       ],
     ),
   );
