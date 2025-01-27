@@ -23,7 +23,7 @@ class _ServiceDetailsState extends State<ServiceDetails> {
   late String polyLine;
   late String serviceName;
   late String serviceDescription;
-  PointAnnotationManager? pointAnnotationManager;
+  
 
   @override
   void initState() {
@@ -33,6 +33,7 @@ class _ServiceDetailsState extends State<ServiceDetails> {
     polyLine = '';
     serviceName = '';
     serviceDescription = '';
+   
     fetchStopDetails();
   }
 
@@ -48,6 +49,7 @@ class _ServiceDetailsState extends State<ServiceDetails> {
           stops = data['stops'];
           polyLine = data['service']['geojson'];
           isLoading = false;
+          
         });
         print('Service Details: $data'); // Log response for debugging
       } else {
@@ -62,44 +64,6 @@ class _ServiceDetailsState extends State<ServiceDetails> {
       throw Exception('Failed to fetch stop details');
     }
   }
-
-  Future<void> _addStopAnnotation() async {
-    
-      // Prepare GeoJSON data for stops 
-      final stopsGeoJson = {
-        "type": "FeatureCollection",
-        "features": stops.map((stop) {
-          return {
-            "type": "Feature",
-            "geometry": {
-              "type": "Point",
-              "coordinates": [stop['longitude'], stop['latitude']],
-            },
-            "properties": {
-              "name": stop['stop_name'],
-            },
-          };
-        }).toList(),
-      };
-
-      await mapboxMap?.style.addSource(GeoJsonSource(
-        id: 'stop-cluster-source', // Source ID
-        data: json.encode(stopsGeoJson),
-      ));
-
-      await mapboxMap?.style.addLayer(SymbolLayer(
-        id: 'stop-layer',
-        sourceId: 'stop-cluster-source',
-        iconImage: "mapbox-bus",
-        iconAnchor: IconAnchor.BOTTOM,
-        iconSize: 1,
-        iconAllowOverlap: true,
-      ));
-      print('Anotations: ${stopsGeoJson}');
-    
-  }
-
-
 
   Future<void> _addRouteLines() async {
     try {
@@ -134,15 +98,38 @@ class _ServiceDetailsState extends State<ServiceDetails> {
           };
           print(routesGeoJson);
 
+          final stopsGeoJson = {
+            "type": "FeatureCollection",
+            "features": stops.map((stop) {
+              return {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    double.parse(stop['longitude']).toStringAsFixed(6),
+                    double.parse(stop['latitude']).toStringAsFixed(6)
+                  ],
+                },
+                "properties": {
+                  "name": stop['stop_name'],
+                },
+              };
+            }).toList(),
+          };
+
           // Add GeoJSON source for the route lines
           await mapboxMap?.style.addSource(GeoJsonSource(
             id: 'route-line-source',
             data: json.encode(routesGeoJson),
           ));
 
+          await mapboxMap?.style.addSource(GeoJsonSource(
+            id: 'stop-route-source', // Source ID
+            data: json.encode(stopsGeoJson),
+          ));
+
           // Add a layer for the route lines
           await mapboxMap?.style.addLayer(LineLayer(
-
             id: 'route-line-layer',
             sourceId: 'route-line-source',
             lineColor: const Color(0xFFE2861D).value,
@@ -150,7 +137,13 @@ class _ServiceDetailsState extends State<ServiceDetails> {
             lineColorExpression: [2, 2],
             lineEmissiveStrength: 1,
             lineOpacity: 1,
-            
+          ));
+
+          await mapboxMap?.style.addLayer(CircleLayer(
+            id: 'stop-layer',
+            sourceId: 'stop-route-source',
+            circleColor: const Color(0xFFE2861D).value,
+            circleRadius: 5,
           ));
 
           // Set camera position (center and zoom)
@@ -273,12 +266,13 @@ class _ServiceDetailsState extends State<ServiceDetails> {
     return double.parse(zoom.toStringAsFixed(2));
   }
 
-  _onMapCreated(MapboxMap mapboxMap) async {
-    pointAnnotationManager =
-        await mapboxMap.annotations.createPointAnnotationManager();
+  
 
+  
+
+  _onMapCreated(MapboxMap mapboxMap) async {
+    this.mapboxMap = mapboxMap;
     if (!isLoading) {
-      await _addStopAnnotation();
       await _addRouteLines();
     }
   }
@@ -292,8 +286,7 @@ class _ServiceDetailsState extends State<ServiceDetails> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:
-            Text("$serviceName", style: TextStyle(color: Colors.white)),
+        title: Text("$serviceName", style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.black,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
@@ -311,34 +304,59 @@ class _ServiceDetailsState extends State<ServiceDetails> {
                   },
                   cameraOptions: CameraOptions(
                     center: Point(
-                      coordinates:
-                          Position(25.595439853871156, 46.72256177763523),
+                      coordinates: Position(
+                        24.9668, // Default longitude
+                        45.9432,
+                      ),
                     ),
-                    zoom: 14,
+                    zoom: 6,
                     pitch: 0,
                     padding:
-                        MbxEdgeInsets(top: 0, left: 0, bottom: 360, right: 0),
+                        MbxEdgeInsets(top: 0, left: 0, bottom: 460, right: 0),
                   ),
                 ),
+
                 // Overlay content
-                Center(
+
+                Positioned(
+                  bottom: 350,
+                  left: 10,
+                  right: 10,
                   child: Container(
+                    height: 90,
                     padding: const EdgeInsets.all(16),
-                    color: Colors.black.withOpacity(0.5),
+                    decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.all(
+                       Radius.circular(25),
+                        
+                      ),
+                      color: Colors.black,
+                    ),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          'Service ID: ${widget.serviceId}\nStop ID: ${widget.stopId}',
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 16),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 10),
-                      ],
+                      serviceName ,
+                      style: const TextStyle(color: Colors.white, fontSize: 16),
                     ),
+                        Text(
+                          serviceDescription ,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        
+                      ],
+                    )
+                    
+                    
                   ),
                 ),
+                
+             
               ],
             ),
     );
