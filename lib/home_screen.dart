@@ -309,9 +309,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final Brightness brightnessValue =
-        MediaQuery.of(context).platformBrightness;
-    bool isDark = brightnessValue == Brightness.dark;
+    
+    
     return Scaffold(
       body: Stack(
         children: [
@@ -326,9 +325,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 zoom: 4.9,
                 padding: MbxEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)),
-            styleUri: isDark
-                ? "mapbox://styles/szocske23/cm4brvrj900pb01r1eq8z9spy"
-                : "mapbox://styles/szocske23/cm4fsoniy000g01r025ho4kxy",
+            styleUri: 
+                "mapbox://styles/szocske23/cm4brvrj900pb01r1eq8z9spy",
             textureView: true,
             onMapCreated: _onMapCreated,
           ),

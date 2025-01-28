@@ -27,8 +27,22 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
   late double longitude;
   int selectedStopId = 0;
   String stopName = "";
-
   List services = [];
+
+  Map<String, List<Map<String, dynamic>>> _groupServicesByRoute(
+      List<dynamic> services) {
+    final groupedServices = <String, List<Map<String, dynamic>>>{};
+
+    for (final service in services.cast<Map<String, dynamic>>()) {
+      final routeName = service['route_name'] ?? 'Unknown Route';
+      if (!groupedServices.containsKey(routeName)) {
+        groupedServices[routeName] = [];
+      }
+      groupedServices[routeName]!.add(service);
+    }
+
+    return groupedServices;
+  }
 
   // Fetch stop details from the API
   Future<void> fetchStopDetails() async {
@@ -94,12 +108,6 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Stația $stopName',
-            style: const TextStyle(color: Colors.white)),
-        backgroundColor: Colors.black,
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
       backgroundColor: Colors.black,
       body: isLoading
           ? const Center(
@@ -108,7 +116,7 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
               children: [
                 MapWidget(
                   styleUri:
-                      "mapbox://styles/szocske23/cm62gk5mp003401s71wfb57jg",
+                      "mapbox://styles/szocske23/cm4brvrj900pb01r1eq8z9spy",
                   onMapCreated: (MapboxMap controller) {
                     mapboxMap = controller;
                     _onMapCreated(controller);
@@ -117,8 +125,8 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
                     center: Point(
                       coordinates: Position(longitude, latitude),
                     ),
-                    zoom: 16.6,
-                    pitch: 40,
+                    zoom: 17,
+                    pitch: 28,
                     padding:
                         MbxEdgeInsets(top: 0, left: 0, bottom: 360, right: 0),
                   ),
@@ -127,131 +135,109 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
 
                 Positioned(
                   bottom: 30,
-                  left: 10,
-                  right: 10,
+                  left: 0,
+                  right: 0,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                          height: 90,
-                          decoration: const BoxDecoration(
-                              borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(25),
-                                  topRight: Radius.circular(25),
-                                  bottomLeft: Radius.circular(25),
-                                  bottomRight: Radius.circular(25)),
-                              color: Colors.black),
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 20),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "Departures",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                SizedBox(
-                                    width: 100,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          "ETA",
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              "info",
-                                              style: TextStyle(
-                                                color: Colors.grey,
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                            Text(
-                                              "buy",
-                                              style: TextStyle(
-                                                color: Colors.grey,
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                          ],
-                                        )
-                                      ],
-                                    )),
-                              ],
+                      // Group services by 'route_name'
+                      ..._groupServicesByRoute(services).entries.map((entry) {
+                        final routeServices =
+                            entry.value; // Services for this route
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Horizontal scrollable services for this route
+                            SizedBox(
+                              height: 90,
+                              child: PageView.builder(
+                                itemCount: routeServices.length,
+                                controller:
+                                    PageController(viewportFraction: 0.9),
+                                itemBuilder: (context, index) {
+                                  final service = routeServices[index];
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 5),
+                                    child: _buildServiceCard(
+                                      service['service_name'] ??
+                                          'Unknown Service',
+                                      _formatTimeAtStop(
+                                          service['time_at_stop']),
+                                      service['service_id'],
+                                      selectedStopId,
+                                      service['route_name'],
+                                      context,
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
-                          )),
-                      services.isEmpty
-                          ? Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 4.0),
-                              child: Container(
-                                height: 90,
-                                decoration: const BoxDecoration(
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(25),
-                                    topRight: Radius.circular(25),
-                                    bottomLeft: Radius.circular(25),
-                                    bottomRight: Radius.circular(25),
-                                  ),
-                                  color: Colors.black,
+                            const SizedBox(
+                                height: 10), // Add spacing between rows
+                          ],
+                        );
+                      }).toList(),
+
+                      // Departures container at the bottom
+                      // Add spacing between sections
+                      Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              // Navigate back to the previous screen
+                              Navigator.of(context).pop();
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.only(left: 10),
+                              height: 60,
+                              width: 60,
+                              decoration: const BoxDecoration(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(25)),
+                                color: Colors.black,
+                              ),
+                              child: const Center(
+                                child: Icon(
+                                  FontAwesomeIcons.chevronLeft,
+                                  color: Colors.white,
                                 ),
-                                child: const Center(
-                                    child: Column(
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(
+                              margin:
+                                  const EdgeInsets.symmetric(horizontal: 10),
+                              height: 60,
+                              decoration: const BoxDecoration(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(25)),
+                                color: Colors.black,
+                              ),
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 20),
+                                child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    Icon(
-                                      FontAwesomeIcons.calendarXmark,
-                                      color: Colors.white54,
-                                      size: 35,
-                                    ),
-                                    SizedBox(
-                                      height: 10,
-                                    ),
                                     Text(
-                                      "There are no rides scheduled",
-                                      style: TextStyle(
-                                          color: Colors.grey,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.normal),
+                                      "Stația $stopName",
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ],
-                                )),
-                              ),
-                            )
-                          :  SizedBox(
-                                height: 300, // Constrain the height
-                                child: SingleChildScrollView(
-                                  child: Column(
-                                    children: [
-                                      ...services.map((service) {
-                                        return _buildServiceCard(
-                                          service['service_name'] ??
-                                              'Unknown Service',
-                                          _formatTimeAtStop(
-                                              service['time_at_stop']),
-                                          service['service_id'],
-                                          selectedStopId,
-                                          context,
-                                        );
-                                      }).toList(),
-                                    ],
-                                  ),
                                 ),
                               ),
-                            
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -276,15 +262,15 @@ String _formatTimeAtStop(String? timeAtStop) {
 }
 
 Widget _buildServiceCard(String serviceName, String eta, int serviceId,
-    int selectedStopId, BuildContext context) {
+    int selectedStopId, String serviceRoute, BuildContext context) {
   return Padding(
-    padding: const EdgeInsets.only(top: 10.0),
+    padding: const EdgeInsets.symmetric(horizontal: 0),
     child: Row(
       children: [
         // Main service card container
         Expanded(
           child: Container(
-            height: 60,
+            height: 90,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(25),
               color: Colors.black,
@@ -292,8 +278,8 @@ Widget _buildServiceCard(String serviceName, String eta, int serviceId,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.transparent,
-                padding: const EdgeInsets.symmetric(
-                    vertical: 16.0, horizontal: 20.0),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 15, horizontal: 20.0),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(25),
                 ),
@@ -308,30 +294,66 @@ Widget _buildServiceCard(String serviceName, String eta, int serviceId,
                   ),
                 );
               },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    serviceName,
-                    style: const TextStyle(fontSize: 16, color: Colors.white),
-                  ),
-                  SizedBox(
-                      width: 100,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          Text(
-                            eta,
-                            style: const TextStyle(
-                                fontSize: 16, color: Colors.white),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 2, horizontal: 5),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              color: Colors.blue,
+                            ),
+                            child: Text(
+                              serviceRoute,
+                              style: const TextStyle(
+                                  fontSize: 16, color: Colors.white),
+                            ),
                           ),
+                          const SizedBox(width: 5),
                           const Icon(
-                            FontAwesomeIcons.cartShopping,
+                            FontAwesomeIcons.play,
                             size: 16,
                             color: Colors.white,
                           ),
+                          const SizedBox(width: 5),
+                          Text(
+                            serviceName,
+                            style: const TextStyle(
+                                fontSize: 16, color: Colors.white),
+                          ),
                         ],
-                      )),
+                      ),
+                      Text(
+                        eta,
+                        style:
+                            const TextStyle(fontSize: 16, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  const Row(
+                    children: [
+                      Icon(
+                        FontAwesomeIcons.circleInfo,
+                        size: 16,
+                        color: Colors.grey,
+                      ),
+                      SizedBox(width: 5),
+                      Text(
+                        'Felszállás az elsö ajtónál',
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
