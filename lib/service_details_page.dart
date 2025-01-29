@@ -362,3 +362,14 @@ class _ServiceDetailsState extends State<ServiceDetails> {
     );
   }
 }
+
+
+Color hexStringToColor(String hexColor) {
+  // Add opacity value if necessary or ensure it's a proper 6-character hex code
+  final buffer = StringBuffer();
+  if (hexColor.length == 6) {
+    buffer.write('FF'); // Default to full opacity
+  }
+  buffer.write(hexColor);
+  return Color(int.parse(buffer.toString(), radix: 16));
+}

@@ -44,6 +44,8 @@ dependencies:
   qr_flutter: ^4.1.0
   flutter_polyline_points: ^2.1.0
   timezone: ^0.10.0
+  barcode: ^2.2.9
+  flutter_svg: ^2.0.17
   
 
 dev_dependencies:

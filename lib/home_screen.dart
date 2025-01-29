@@ -565,7 +565,7 @@ Widget _buildStopView(BuildContext context, Map<String, dynamic> stop) {
                   height: 28,
                   padding: const EdgeInsets.all(5),
                   decoration: const BoxDecoration(
-                    color: Color(0xFFFF7C0A),
+                    color: Colors.blue,
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(6),
                       bottomRight: Radius.circular(4),
@@ -575,8 +575,8 @@ Widget _buildStopView(BuildContext context, Map<String, dynamic> stop) {
                   ),
                   child: const Icon(
                     Icons.directions_bus,
-                    size: 15,
-                    color: Colors.black,
+                    size: 16,
+                    color: Colors.white,
                   ),
                 ),
                 const SizedBox(width: 4),
@@ -594,16 +594,16 @@ Widget _buildStopView(BuildContext context, Map<String, dynamic> stop) {
                         ),
                         decoration: BoxDecoration(
                           color:
-                              const Color(0xFFE2861D), // Fixed color for routes
+                               Colors.blue, // Fixed color for routes
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
                           route["name"],
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                            fontSize: 12,
+                            fontSize: 14,
                             fontWeight: FontWeight.w700,
-                            color: Colors.black,
+                            color: Colors.white,
                           ),
                         ),
                       );
