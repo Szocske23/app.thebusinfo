@@ -224,7 +224,7 @@ class TicketCard extends StatelessWidget {
                     Expanded(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Column(
                             mainAxisAlignment: MainAxisAlignment.start,
@@ -233,12 +233,12 @@ class TicketCard extends StatelessWidget {
                               Text(
                             ticket['start_stop_name'],
                             style: const TextStyle(
-                                fontSize: 16, color: Colors.white),
+                                fontSize: 18, color: Colors.white),
                           ),
                           Text(
                             ticket['start_stop_city'],
                             style: const TextStyle(
-                                fontSize: 12, color: Colors.white38),
+                                fontSize: 12, color: Colors.white54),
                           ),
 
                             ],
@@ -256,12 +256,12 @@ class TicketCard extends StatelessWidget {
                               Text(
                             ticket['end_stop_name'],
                             style: const TextStyle(
-                                fontSize: 16, color: Colors.white),
+                                fontSize: 18, color: Colors.white),
                           ),
                               Text(
                             ticket['end_stop_city'],
                             style: const TextStyle(
-                                fontSize: 12, color: Colors.white38),
+                                fontSize: 12, color: Colors.white54),
                           ),
                             ],
                           ),
@@ -285,12 +285,12 @@ class TicketCard extends StatelessWidget {
                       
                       '${DateTime.parse(ticket['service_start_time']).day}.${DateTime.parse(ticket['service_start_time']).month}.${DateTime.parse(ticket['service_start_time']).year}',
                       
-                      style: const TextStyle(color: Colors.white12)),
+                      style: const TextStyle(color: Colors.white38)),
                       Text(
                       
                       ticket['uid'],
                       
-                      style: const TextStyle(color: Colors.white12)),
+                      style: const TextStyle(color: Colors.white38)),
                 
               
               

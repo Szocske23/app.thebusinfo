@@ -485,11 +485,11 @@ class _HomeScreenState extends State<HomeScreen> {
               height: 90,
               child: PageView.builder(
                 itemCount: closestStops.length,
-                controller: PageController(viewportFraction: 0.9),
+                controller: PageController(viewportFraction: 0.88),
                 itemBuilder: (context, index) {
                   final stop = closestStops[index];
                   return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    padding: const EdgeInsets.symmetric(horizontal: 7),
                     child: _buildStopView(context, stop),
                   );
                 },
