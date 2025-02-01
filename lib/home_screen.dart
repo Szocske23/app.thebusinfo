@@ -548,7 +548,7 @@ Widget _buildStopView(BuildContext context, Map<String, dynamic> stop) {
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white38,
+                    color: Colors.white70,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
