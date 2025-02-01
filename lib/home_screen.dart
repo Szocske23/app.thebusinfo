@@ -158,6 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
             return {
               "id": stop["id"],
               "name": stop["name"],
+              "city": stop["city"],
               "latitude": double.parse(stop["latitude"]),
               "longitude": double.parse(stop["longitude"]),
               "distance": stop["distance"], // Distance provided by the API
@@ -203,6 +204,7 @@ class _HomeScreenState extends State<HomeScreen> {
         clusterRadius: 40, // Radius for clustering
         clusterMaxZoom: 14.6, // Maximum zoom to cluster points
         tolerance: 0.0, // Tolerance for clustering
+        
       ));
 
       // Add a layer for clusters
@@ -325,7 +327,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     45.9432, // Default latitude
                   ),
                 ),
-                zoom: 4.9,
+                zoom: 5,
                 padding: MbxEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)),
             styleUri: 
                 "mapbox://styles/szocske23/cm4brvrj900pb01r1eq8z9spy",
@@ -486,7 +488,7 @@ class _HomeScreenState extends State<HomeScreen> {
             left: 0,
             right: 0,
             child: SizedBox(
-              height: 90,
+              height: 105,
               child: PageView.builder(
                 itemCount: closestStops.length,
                 controller: PageController(viewportFraction: 0.9),
@@ -529,30 +531,43 @@ Widget _buildStopView(BuildContext context, Map<String, dynamic> stop) {
           ),
         ],
       ),
-      padding: const EdgeInsets.only(left: 15, top: 15, right: 15, bottom: 10),
+      padding: const EdgeInsets.only(left: 15, top: 15, right: 20, bottom: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
                 '${stop["name"]}',
                 style: const TextStyle(
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(width: 16),
+              Text(
+                '${stop["city"]}',
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.white38,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+                ],
+              ),
+              
               Text(
                 '${(stop["distance"] * 1000).toStringAsFixed(0)} m',
                 // ignore: avoid_print
 
                 style: const TextStyle(
-                  fontSize: 12,
+                  fontSize: 14,
                   fontWeight: FontWeight.w800,
                   color: Colors.grey,
                 ),
@@ -586,7 +601,7 @@ Widget _buildStopView(BuildContext context, Map<String, dynamic> stop) {
                   child: Wrap(
                     spacing: 4,
                     runSpacing: 4,
-                    children: stop["routes"].take(3).map<Widget>((route) {
+                    children: stop["routes"].map<Widget>((route) {
                       print(stop);
                       return Container(
                         height: 28,

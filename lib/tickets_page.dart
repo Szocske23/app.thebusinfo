@@ -189,34 +189,9 @@ class TicketCard extends StatelessWidget {
               width: double.infinity,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                    '${ticket['uid']}',
-                    textAlign: TextAlign.end, // Align text to the left
-                    style: const TextStyle(
-                      color: Colors.white24,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w300,
-                    ),
-                  ),
-                  Text(
-                      
-                      'Valid pe: ${DateTime.parse(ticket['service_start_time']).day}.${DateTime.parse(ticket['service_start_time']).month}.${DateTime.parse(ticket['service_start_time']).year}',
-                      
-                      style: const TextStyle(color: Colors.white12)),
-                ],
-              )),
-          const SizedBox(height: 10),
-          SizedBox(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
+                  Container(
                       padding: const EdgeInsets.symmetric(
                           vertical: 2, horizontal: 5),
                       decoration: BoxDecoration(
@@ -229,28 +204,69 @@ class TicketCard extends StatelessWidget {
                             const TextStyle(fontSize: 16, color: Colors.white),
                       ),
                     ),
-                    const SizedBox(width: 15),
+                  
+                  Text('Pret: ${ticket['price']} RON',
+                  style: const TextStyle(color: Colors.white54)),
+                  
+                ],
+              )),
+          const SizedBox(height: 10),
+          SizedBox(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    
+                    
                     Expanded(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text(
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
                             ticket['start_stop_name'],
                             style: const TextStyle(
                                 fontSize: 16, color: Colors.white),
                           ),
+                          Text(
+                            ticket['start_stop_city'],
+                            style: const TextStyle(
+                                fontSize: 12, color: Colors.white38),
+                          ),
+
+                            ],
+                          ),
+                          
                           const Icon(
                             FontAwesomeIcons.play,
                             size: 16,
                             color: Colors.white,
                           ),
-                          Text(
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
                             ticket['end_stop_name'],
                             style: const TextStyle(
                                 fontSize: 16, color: Colors.white),
                           ),
+                              Text(
+                            ticket['end_stop_city'],
+                            style: const TextStyle(
+                                fontSize: 12, color: Colors.white38),
+                          ),
+                            ],
+                          ),
                         ],
+
                       ),
                     ),
                   ],
@@ -262,16 +278,20 @@ class TicketCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
+             
                   Text(
-                    'Cumpara la: ${DateTime.parse(ticket['sold_at']).day}.${DateTime.parse(ticket['sold_at']).month}.${DateTime.parse(ticket['sold_at']).year} ${DateTime.parse(ticket['sold_at']).hour + 2}:${DateTime.parse(ticket['sold_at']).minute}',
-                    style: const TextStyle(color: Colors.grey),
-                  )
-                ],
-              ),
-              Text('Pret: ${ticket['price']} RON',
-                  style: const TextStyle(color: Colors.white)),
+                      
+                      '${DateTime.parse(ticket['service_start_time']).day}.${DateTime.parse(ticket['service_start_time']).month}.${DateTime.parse(ticket['service_start_time']).year}',
+                      
+                      style: const TextStyle(color: Colors.white12)),
+                      Text(
+                      
+                      ticket['uid'],
+                      
+                      style: const TextStyle(color: Colors.white12)),
+                
+              
+              
             ],
           ),
           if (isLatest)
