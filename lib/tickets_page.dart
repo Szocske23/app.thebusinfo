@@ -274,7 +274,9 @@ class TicketCard extends StatelessWidget {
               ],
             ),
           ),
+          if (isLatest)
           const SizedBox(height: 10),
+          if (isLatest)
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
