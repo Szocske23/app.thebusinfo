@@ -29,6 +29,7 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
   String stopName = "";
   List services = [];
 
+
   Map<String, List<Map<String, dynamic>>> _groupServicesByRoute(
       List<dynamic> services) {
     final groupedServices = <String, List<Map<String, dynamic>>>{};
@@ -59,6 +60,7 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
           selectedStopId = data['stop_id'];
           routes = data['routes']; // Store the routes data
           services = data['services']; // Store the services data
+         
 
           isLoading = false;
         });

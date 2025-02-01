@@ -200,7 +200,7 @@ class _HomeScreenState extends State<HomeScreen> {
         id: 'stop-cluster-source', // Source ID
         data: json.encode(stopsGeoJson),
         cluster: true,
-        clusterRadius: 50, // Radius for clustering
+        clusterRadius: 40, // Radius for clustering
         clusterMaxZoom: 14.6, // Maximum zoom to cluster points
         tolerance: 0.0, // Tolerance for clustering
       ));
@@ -240,6 +240,8 @@ class _HomeScreenState extends State<HomeScreen> {
         iconKeepUpright: true,
         iconAllowOverlap: true,
       ));
+
+      
     } catch (e) {
       _showError('Error adding stop clusters: $e');
     }
