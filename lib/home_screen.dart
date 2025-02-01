@@ -204,7 +204,6 @@ class _HomeScreenState extends State<HomeScreen> {
         clusterRadius: 40, // Radius for clustering
         clusterMaxZoom: 14.6, // Maximum zoom to cluster points
         tolerance: 0.0, // Tolerance for clustering
-        
       ));
 
       // Add a layer for clusters
@@ -242,8 +241,6 @@ class _HomeScreenState extends State<HomeScreen> {
         iconKeepUpright: true,
         iconAllowOverlap: true,
       ));
-
-      
     } catch (e) {
       _showError('Error adding stop clusters: $e');
     }
@@ -313,8 +310,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    
-    
     return Scaffold(
       body: Stack(
         children: [
@@ -329,8 +324,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 zoom: 5,
                 padding: MbxEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)),
-            styleUri: 
-                "mapbox://styles/szocske23/cm4brvrj900pb01r1eq8z9spy",
+            styleUri: "mapbox://styles/szocske23/cm4brvrj900pb01r1eq8z9spy",
             textureView: true,
             onMapCreated: _onMapCreated,
           ),
@@ -488,7 +482,7 @@ class _HomeScreenState extends State<HomeScreen> {
             left: 0,
             right: 0,
             child: SizedBox(
-              height: 105,
+              height: 90,
               child: PageView.builder(
                 itemCount: closestStops.length,
                 controller: PageController(viewportFraction: 0.9),
@@ -539,29 +533,26 @@ Widget _buildStopView(BuildContext context, Map<String, dynamic> stop) {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                '${stop["name"]}',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+              Row(children: [
+                Text(
+                  '${stop["name"]} - ',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-                overflow: TextOverflow.ellipsis,
-              ),
-              Text(
-                '${stop["city"]}',
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.white38,
+                Text(
+                  '${stop["city"]}',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white38,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-                overflow: TextOverflow.ellipsis,
-              ),
-                ],
-              ),
-              
+              ]),
               Text(
                 '${(stop["distance"] * 1000).toStringAsFixed(0)} m',
                 // ignore: avoid_print
@@ -610,8 +601,7 @@ Widget _buildStopView(BuildContext context, Map<String, dynamic> stop) {
                           horizontal: 8,
                         ),
                         decoration: BoxDecoration(
-                          color:
-                               Colors.blue, // Fixed color for routes
+                          color: Colors.blue, // Fixed color for routes
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
