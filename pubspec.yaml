@@ -78,6 +78,7 @@ flutter:
     - assets/logo_trsp.png
     - assets/app_logo_trsp.png
     - assets/landing_screen.jpg
+    - assets/bg_gradient.png
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

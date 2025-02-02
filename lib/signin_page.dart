@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({Key? key}) : super(key: key);
@@ -93,8 +94,11 @@ class _SignInPageState extends State<SignInPage> {
           ),
         ),
       ),
+      
       backgroundColor: Colors.black,
-      body: Padding(
+      body: 
+      
+      Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,

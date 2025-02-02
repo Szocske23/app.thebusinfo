@@ -56,8 +56,15 @@ class _TicketsPageState extends State<TicketsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white24,
-      body: Stack(
+      body: 
+      Stack(
         children: [
+          Positioned.fill(
+          child: Image.asset(
+            'assets/bg_gradient.png', // Replace with your image path
+            fit: BoxFit.cover, // Ensures the image covers the screen
+          ),
+        ),
           Positioned(
             top: 80,
             left: 10,
