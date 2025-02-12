@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:app_thebusinfo/poi_details_page.dart';
 import 'package:app_thebusinfo/settings_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ import 'stop_details_page.dart';
 import 'tickets_page.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'signin_page.dart';
+import 'package:uuid/uuid.dart';
 
 Future<bool> validateToken() async {
   final tokens = await AuthStorage.getTokens();
@@ -90,6 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> closestStops = [];
   Timer? debounceTimer;
   PointAnnotation? locationIndicator; // Custom location marker
+  String mapboxSessionToken = const Uuid().v4(); // Generate and store a session token
 
   List<Map<String, dynamic>> searchStops = [];
   List<Map<String, dynamic>> searchCityes = [];
@@ -277,35 +280,38 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  Future<void> fetchSearchResults(String query) async {
-    if (query.length < 3) {
-      searchStops = [];
-      searchCityes = [];
-      searchPois = [];
-      return;
-    }
-
-    try {
-      final response = await http
-          .get(Uri.https('api.thebus.info', '/v1/search', {'query': query}));
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        print(data);
-        setState(() {
-          searchStops = List<Map<String, dynamic>>.from(data['stops']);
-          print(searchStops);
-          searchCityes = List<Map<String, dynamic>>.from(data['cities']);
-          print(searchCityes);
-          searchPois = List<Map<String, dynamic>>.from(data['pois']);
-          print(searchPois);
-        });
-      }
-    } catch (e) {
-      print(e);
-      _showError('Search failed: $e');
-    }
+ Future<void> fetchSearchResults(String query) async {
+  if (query.length < 3) {
+    searchStops = [];
+    searchCityes = [];
+    searchPois = [];
+    return;
   }
+
+  try {
+    final response = await http.get(Uri.https(
+      'api.thebus.info',
+      '/v1/search',
+      {'query': query, 'mapbox_session_token': mapboxSessionToken}, // Include session token
+    ));
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      print(data);
+      setState(() {
+        searchStops = List<Map<String, dynamic>>.from(data['stops']);
+        print(searchStops);
+        searchCityes = List<Map<String, dynamic>>.from(data['cities']);
+        print(searchCityes);
+        searchPois = List<Map<String, dynamic>>.from(data['pois']);
+        print(searchPois);
+      });
+    }
+  } catch (e) {
+    print(e);
+    _showError('Search failed: $e');
+  }
+}
 
   Future<void> _updateCamera(LocationData locationData) async {
     if (locationData.latitude != null && locationData.longitude != null) {
@@ -553,7 +559,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             return Padding(
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 7),
-                                child: _buildSearchCard(stop, 'Stop', context));
+                                child: _buildSearchCard(stop, 'Stop', context, mapboxSessionToken));
                           },
                         ),
                       ),
@@ -569,7 +575,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             return Padding(
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 7),
-                                child: _buildSearchCard(city, 'City', context));
+                                child: _buildSearchCard(city, 'City', context, mapboxSessionToken));
                           },
                         ),
                       ),
@@ -586,7 +592,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             return Padding(
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 7),
-                                child: _buildSearchCard(poi, 'POI', context));
+                                child: _buildSearchCard(poi, 'POI', context, mapboxSessionToken));
                           },
                         ),
                       ),
@@ -772,7 +778,7 @@ Color hexStringToColor(String hexColor) {
   return Color(int.parse(buffer.toString(), radix: 16));
 }
 
-Widget _buildSearchCard(dynamic item, String type, BuildContext context) {
+Widget _buildSearchCard(dynamic item, String type, BuildContext context, String mapboxSessionToken) {
   return GestureDetector(
     onTap: () {
       if (type == 'Stop') {
@@ -780,6 +786,14 @@ Widget _buildSearchCard(dynamic item, String type, BuildContext context) {
           context,
           MaterialPageRoute(
             builder: (context) => StopDetailsPage(stopId: item['id']),
+          ),
+        );
+      }
+      if (type == 'POI') {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PoiDetailsPage(sessionToken: mapboxSessionToken ,poiUid: item['id']),
           ),
         );
       }
