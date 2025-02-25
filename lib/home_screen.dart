@@ -657,26 +657,39 @@ Widget _buildStopView(BuildContext context, Map<String, dynamic> stop) {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(children: [
-                Text(
-                  '${stop["name"]} - ',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  '${stop["city"]}',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white70,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ]),
+               
+              SizedBox(
+  width: MediaQuery.of(context).size.width * 0.88 - 110, // Adjusted for padding  // Ensures Row has a bounded width
+  child: Row(
+    children: [
+      Text(
+        '${stop["name"]} - ', // Stop name always fully visible
+        style: const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+      ),
+      Expanded(
+        child: Align(
+          alignment: Alignment.centerLeft, // Ensures proper fading effect
+          child: Text(
+            '${stop["city"]}', // City fades if too long
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white70,
+            ),
+            overflow: TextOverflow.fade,
+            softWrap: false,
+          ),
+        ),
+      ),
+    ],
+  ),
+),
+              
+               
               Text(
                 '${(stop["distance"] * 1000).toStringAsFixed(0)} m',
                 // ignore: avoid_print
