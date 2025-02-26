@@ -12,7 +12,8 @@ class RoutePlannerPage extends StatefulWidget {
   final String? destinationName;
   final double? destinationLat;
   final double? destinationLon;
-
+ 
+  
   RoutePlannerPage({
     this.userLat,
     this.userLon,
@@ -27,7 +28,9 @@ class RoutePlannerPage extends StatefulWidget {
 
 class _RoutePlannerPageState extends State<RoutePlannerPage> {
   // Add any variables or methods related to route planning here
-  DateTime selectedDateTime = DateTime.now();
+  late DateTime selectedDate;
+  final PageController _controller = PageController(viewportFraction: 0.20,initialPage: 2);
+
   List<dynamic>? routes;
   bool isLoading = false; // Track loading state
   bool noRoutes = false; // Track if no routes are available
@@ -35,6 +38,7 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
   @override
   void initState() {
     super.initState();
+     selectedDate = DateTime.now();
     _checkAndFetchRoute();
   }
 
@@ -52,7 +56,7 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
       isLoading = true; // Show progress indicator
     });
 
-    final String date = DateFormat('yyyy-MM-dd').format(selectedDateTime);
+    final String date = DateFormat('yyyy-MM-dd').format(selectedDate);
 
     // Make the API request
     final Uri url = Uri.parse(
@@ -92,75 +96,17 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
     }
   }
 
-  Future<void> _selectDateTime(BuildContext context) async {
-    if (Platform.isIOS) {
-      // iOS Cupertino Picker
-      showCupertinoModalPopup(
-        context: context,
-        builder: (context) => Container(
-          height: 380,
-          color: Colors.white,
-          child: Column(
-            children: [
-              SizedBox(
-                height: 300,
-                child: CupertinoDatePicker(
-                  mode: CupertinoDatePickerMode.dateAndTime,
-                  initialDateTime: selectedDateTime,
-                  onDateTimeChanged: (DateTime newDateTime) {
-                    setState(() {
-                      selectedDateTime = newDateTime;
-                    });
-                  },
-                ),
-              ),
-              CupertinoButton(
-                child: Text("Done"),
-                onPressed: () {
-                  Navigator.pop(context);
-                  _checkAndFetchRoute();
-                },
-              ),
-            ],
-          ),
-        ),
-      );
-    } else {
-      // Android Material Picker
-      DateTime now = DateTime.now();
-
-      DateTime? pickedDate = await showDatePicker(
-        context: context,
-        initialDate: selectedDateTime,
-        firstDate: now,
-        lastDate: DateTime(2100),
-      );
-
-      if (pickedDate == null) return;
-
-      TimeOfDay? pickedTime = await showTimePicker(
-        context: context,
-        initialTime: TimeOfDay.fromDateTime(selectedDateTime),
-      );
-
-      if (pickedTime == null) return;
-
-      setState(() {
-        selectedDateTime = DateTime(
-          pickedDate.year,
-          pickedDate.month,
-          pickedDate.day,
-          pickedTime.hour,
-          pickedTime.minute,
-        );
-      });
-    }
+  Duration calculateDuration(String departureTime, String arrivalTime) {
+    DateTime departure = DateFormat("HH:mm:ss").parse(departureTime);
+    DateTime arrival = DateFormat("HH:mm:ss").parse(arrivalTime);
+    return arrival.difference(departure);
   }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 4, 4, 8),
+      backgroundColor: const Color.fromARGB(255, 7, 7, 7),
       body: Stack(
         children: [
           //   Positioned.fill(
@@ -169,7 +115,7 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
           //     fit: BoxFit.cover, // Ensures the image covers the screen
           //   ),
           // ),
-          if (routes == null && isLoading)
+          if (isLoading)
             const Center(
               child: CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
@@ -193,7 +139,7 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
               right: 0,
               child: Container(
                 color: Colors.transparent,
-                height: 1000,
+                height: 580,
                 child: ListView.builder(
                   padding: const EdgeInsets.all(0),
                   itemCount: routes!.length,
@@ -224,13 +170,22 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
                                     Text(
                                       route['departure_time'],
                                       style: const TextStyle(
-                                        color: Colors.white54,
+                                        color: Colors.white70,
                                         fontSize: 14,
+                                      ),
+                                    ),
+                                    Text(
+                                      DateFormat("dd MMM")
+                                          .format(DateTime.parse(route['date']))
+                                          .toUpperCase(),
+                                      style: const TextStyle(
+                                        color: Colors.white54,
+                                        fontSize: 12,
                                       ),
                                     ),
                                   ],
                                 ),
-                                const SizedBox(width: 10),
+                                const SizedBox(width: 14),
                                 Expanded(
                                     child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -244,7 +199,7 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
                                           route["route"],
                                           textAlign: TextAlign.center,
                                           style: const TextStyle(
-                                            fontSize: 12,
+                                            fontSize: 14,
                                             fontWeight: FontWeight.w700,
                                             color: Colors.white,
                                           ),
@@ -254,31 +209,64 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
                                     const Divider(
                                       color: Colors.blue,
                                       thickness: 2,
-                                    )
+                                    ),
+                                    Text(
+                                      (() {
+                                        final arrivalTime = DateFormat("HH:mm")
+                                            .parse(route['arrival_time']);
+                                        final departureTime =
+                                            DateFormat("HH:mm")
+                                                .parse(route['departure_time']);
+                                        final duration = arrivalTime
+                                            .difference(departureTime);
+
+                                        return "${duration.inHours}h ${duration.inMinutes.remainder(60)}m";
+                                      })(),
+                                      style: const TextStyle(
+                                        color: Colors.white54,
+                                        fontSize: 12,
+                                      ),
+                                    ),
                                   ],
                                 )),
-                                const SizedBox(width: 10),
+                                const SizedBox(width: 14),
                                 Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
                                       route['arrival_time'],
                                       style: const TextStyle(
-                                        color: Colors.white54,
+                                        color: Colors.white70,
                                         fontSize: 14,
+                                      ),
+                                    ),
+                                    Text(
+                                      DateFormat("dd MMM")
+                                          .format(DateTime.parse(route['date']))
+                                          .toUpperCase(),
+                                      style: const TextStyle(
+                                        color: Colors.white54,
+                                        fontSize: 12,
                                       ),
                                     ),
                                   ],
                                 ),
-                                const SizedBox(width: 10),
+                                const SizedBox(width: 15),
                                 Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      route['price'] + 'Ron',
+                                      route['price'],
                                       style: const TextStyle(
-                                        color: Colors.white54,
+                                        color: Colors.white70,
                                         fontSize: 14,
+                                      ),
+                                    ),
+                                    const Text(
+                                      'RON',
+                                      style: TextStyle(
+                                        color: Colors.white54,
+                                        fontSize: 12,
                                       ),
                                     ),
                                   ],
@@ -320,6 +308,16 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
                                               fontSize: 14,
                                             ),
                                           ),
+                                          Text(
+                                            DateFormat("dd MMM")
+                                                .format(DateTime.parse(
+                                                    route['first_leg']['date']))
+                                                .toUpperCase(),
+                                            style: const TextStyle(
+                                              color: Colors.white54,
+                                              fontSize: 12,
+                                            ),
+                                          ),
                                         ],
                                       ),
                                       const SizedBox(width: 10),
@@ -338,7 +336,7 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
                                                 route['first_leg']['route'],
                                                 textAlign: TextAlign.center,
                                                 style: const TextStyle(
-                                                  fontSize: 12,
+                                                  fontSize: 14,
                                                   fontWeight: FontWeight.w500,
                                                   color: Colors.white70,
                                                 ),
@@ -348,21 +346,94 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
                                           const Divider(
                                             color: Colors.blue,
                                             thickness: 2,
-                                          )
+                                          ),
+                                          Text(
+                                            (() {
+                                              final arrivalTime =
+                                                  DateFormat("HH:mm").parse(
+                                                      route['first_leg']
+                                                          ['arrival_time']);
+                                              final departureTime =
+                                                  DateFormat("HH:mm").parse(
+                                                      route['first_leg']
+                                                          ['departure_time']);
+                                              final duration = arrivalTime
+                                                  .difference(departureTime);
+
+                                              return "${duration.inHours}h ${duration.inMinutes.remainder(60)}m";
+                                            })(),
+                                            style: const TextStyle(
+                                              color: Colors.white54,
+                                              fontSize: 12,
+                                            ),
+                                          ),
                                         ],
                                       )),
-                                      if (route['walk_distance'] > 0)
-                                        const SizedBox(width: 10),
-                                      if (route['walk_distance'] > 0)
-                                        const SizedBox(
-                                            width: 30,
+                                      const SizedBox(width: 10),
+                                      if (route['walk_distance'] == 0)
+                                        SizedBox(
+                                            width: 50,
                                             child: Column(
                                               mainAxisAlignment:
                                                   MainAxisAlignment.center,
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.center,
                                               children: [
-                                                Row(
+                                                const Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Padding(
+                                                      padding:
+                                                          EdgeInsets.all(3),
+                                                      child: Icon(
+                                                          FontAwesomeIcons
+                                                              .stopwatch,
+                                                          color: Colors.white70,
+                                                          size: 14),
+                                                    )
+                                                  ],
+                                                ),
+                                                const Divider(
+                                                  color: Colors.grey,
+                                                  thickness: 2,
+                                                ),
+                                                Text(
+                                                  (() {
+                                                    final arrivalTime = DateFormat(
+                                                            "HH:mm")
+                                                        .parse(route[
+                                                                'second_leg']
+                                                            ['departure_time']);
+                                                    final departureTime =
+                                                        DateFormat("HH:mm")
+                                                            .parse(route[
+                                                                    'first_leg']
+                                                                [
+                                                                'arrival_time']);
+                                                    final duration =
+                                                        arrivalTime.difference(
+                                                            departureTime);
+
+                                                    return "${duration.inHours}h ${duration.inMinutes.remainder(60)}m";
+                                                  })(),
+                                                  style: const TextStyle(
+                                                    color: Colors.white54,
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                              ],
+                                            )),
+                                      if (route['walk_distance'] > 0)
+                                        SizedBox(
+                                            width: 50,
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                const Row(
                                                   mainAxisAlignment:
                                                       MainAxisAlignment.center,
                                                   children: [
@@ -370,13 +441,37 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
                                                         FontAwesomeIcons
                                                             .personWalkingLuggage,
                                                         color: Colors.white70,
-                                                        size: 18),
+                                                        size: 20),
                                                   ],
                                                 ),
-                                                Divider(
+                                                const Divider(
                                                   color: Colors.grey,
                                                   thickness: 2,
-                                                )
+                                                ),
+                                                Text(
+                                                  (() {
+                                                    final arrivalTime = DateFormat(
+                                                            "HH:mm")
+                                                        .parse(route[
+                                                                'second_leg']
+                                                            ['departure_time']);
+                                                    final departureTime =
+                                                        DateFormat("HH:mm")
+                                                            .parse(route[
+                                                                    'first_leg']
+                                                                [
+                                                                'arrival_time']);
+                                                    final duration =
+                                                        arrivalTime.difference(
+                                                            departureTime);
+
+                                                    return "${duration.inHours}h ${duration.inMinutes.remainder(60)}m";
+                                                  })(),
+                                                  style: const TextStyle(
+                                                    color: Colors.white54,
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
                                               ],
                                             )),
                                       const SizedBox(width: 10),
@@ -395,7 +490,7 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
                                                 route['second_leg']['route'],
                                                 textAlign: TextAlign.center,
                                                 style: const TextStyle(
-                                                  fontSize: 12,
+                                                  fontSize: 14,
                                                   fontWeight: FontWeight.w500,
                                                   color: Colors.white70,
                                                 ),
@@ -405,7 +500,27 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
                                           const Divider(
                                             color: Colors.blue,
                                             thickness: 2,
-                                          )
+                                          ),
+                                          Text(
+                                            (() {
+                                              final arrivalTime =
+                                                  DateFormat("HH:mm").parse(
+                                                      route['second_leg']
+                                                          ['arrival_time']);
+                                              final departureTime =
+                                                  DateFormat("HH:mm").parse(
+                                                      route['second_leg']
+                                                          ['departure_time']);
+                                              final duration = arrivalTime
+                                                  .difference(departureTime);
+
+                                              return "${duration.inHours}h ${duration.inMinutes.remainder(60)}m";
+                                            })(),
+                                            style: const TextStyle(
+                                              color: Colors.white54,
+                                              fontSize: 12,
+                                            ),
+                                          ),
                                         ],
                                       )),
                                       const SizedBox(width: 10),
@@ -418,6 +533,17 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
                                             style: const TextStyle(
                                               color: Colors.white,
                                               fontSize: 14,
+                                            ),
+                                          ),
+                                          Text(
+                                            DateFormat("dd MMM")
+                                                .format(DateTime.parse(
+                                                    route['second_leg']
+                                                        ['date']))
+                                                .toUpperCase(),
+                                            style: const TextStyle(
+                                              color: Colors.white54,
+                                              fontSize: 12,
                                             ),
                                           ),
                                         ],
@@ -435,9 +561,9 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
                                             ),
                                           ),
                                           Text(
-                                            route['first_leg']['price'] + 'Ron',
+                                            '${(double.parse(route['first_leg']['price']) + double.parse(route['second_leg']['price']))}',
                                             style: const TextStyle(
-                                              color: Colors.white54,
+                                              color: Colors.white,
                                               fontSize: 14,
                                             ),
                                           ),
@@ -503,98 +629,77 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
                 ),
               ),
             ),
+
+
           Positioned(
-            bottom: 100,
-            left: 18,
-            right: 18,
-            child: Container(
-              height: 120,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(32),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color.fromARGB(14, 197, 197, 255),
-                    spreadRadius: 1,
-                    blurRadius: 20,
-                    offset: Offset(0, 0),
+      bottom: 100,
+      left: 0,
+      right: 0,
+      child: SizedBox(
+        height: 90,
+        child: PageView.builder(
+          itemCount: 10, // Next 10 days
+          controller: _controller,
+          itemBuilder: (context, index) {
+            DateTime date = DateTime.now().add(Duration(days: index));
+
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  selectedDate = date;
+                  routes = []; // No routes available
+                });
+                _fetchRoute();
+                
+                
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                    side: BorderSide(
+                      color: selectedDate.year == date.year &&
+                                    selectedDate.month == date.month &&
+                                    selectedDate.day == date.day
+                                ? Colors.white
+                                : Colors.transparent,// White border for selected date
+                      width: 2, // Border width
+                    ),
                   ),
-                ],
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                  color: Colors.black,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children:[
                       Text(
-                        "De la:",
-                        style: TextStyle(
-                          color: Colors.white54,
-                          fontSize: 14,
-                        ),
+                      DateFormat('dd').format(date),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Icon(
-                            FontAwesomeIcons.locationArrow,
-                            color: Colors.white,
-                          ),
-                          Text(
-                            "Locatia mea",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
+                    ),
+                    Text(
+                      DateFormat('MMM').format(date),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.white70 ,
                       ),
-                    ],
+                    ),
+
+                    ] 
                   ),
-                  const Divider(
-                    color: Colors.white10,
-                    thickness: 1,
-                  ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      const Text(
-                        "Pana la:",
-                        style: TextStyle(
-                          color: Colors.white54,
-                          fontSize: 14,
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            widget.destinationName ?? "Destinație necunoscută",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const Icon(
-                            FontAwesomeIcons.mapPin,
-                            color: Colors.white,
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
-                ],
+                ),
               ),
-            ),
+            );
+          },
+        ),
+      ),
           ),
+
+
+
 
           Positioned(
             bottom: 30,
@@ -624,32 +729,32 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
                   ),
                 ),
                 Expanded(
-                  child: GestureDetector(
-                    onTap: () => _selectDateTime(context),
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 10),
-                      height: 60,
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 10),
+                    height: 60,
+                    decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(25)),
+                      color: Colors.black,
+                    ),
+                    child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
-                      decoration: BoxDecoration(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(25)),
-                        color: Colors.black,
-                        border: Border.all(color: Colors.white10),
-                      ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          const Icon(
-                            FontAwesomeIcons.solidCalendar,
-                            color: Colors.white54,
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            DateFormat("yyyy-MM-dd HH:mm")
-                                .format(selectedDateTime),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
+                          Flexible(
+                            // Ensures proper text overflow handling
+                            child: Text(
+                              widget.destinationName ?? "Destinatie",
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                overflow:
+                                    TextOverflow.fade, // Enables fade effect
+                              ),
+                              softWrap: false, // Prevents text from wrapping
+                              overflow: TextOverflow.fade,
                             ),
                           ),
                         ],
