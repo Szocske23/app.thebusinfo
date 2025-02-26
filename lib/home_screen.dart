@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:app_thebusinfo/poi_details_page.dart';
+import 'package:app_thebusinfo/route_planner_page.dart';
 import 'package:app_thebusinfo/settings_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,7 @@ import 'tickets_page.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'signin_page.dart';
 import 'package:uuid/uuid.dart';
+
 
 Future<bool> validateToken() async {
   final tokens = await AuthStorage.getTokens();
@@ -402,6 +404,44 @@ class _HomeScreenState extends State<HomeScreen> {
                       FontAwesomeIcons.gear,
                       size: 25,
                       color: Colors.grey,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 120,
+            right: 0,
+            child: GestureDetector(
+              onTap: () async {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) =>  RoutePlannerPage()),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.all(10.0),
+                child: Container(
+                  height: 60,
+                  width: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(25),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x20e2861d),
+                        spreadRadius: 2,
+                        blurRadius: 20,
+                        offset: Offset(0, 0),
+                      ),
+                    ],
+                  ),
+                  child: const Center(
+                    child: FaIcon(
+                      FontAwesomeIcons.route,
+                      size: 25,
+                      color: Colors.white,
                     ),
                   ),
                 ),

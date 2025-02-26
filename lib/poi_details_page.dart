@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:app_thebusinfo/route_planner_page.dart';
 import 'package:app_thebusinfo/stop_details_page.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -169,7 +170,50 @@ class _PoiDetailsPageState extends State<PoiDetailsPage> {
             // ),
             // child: Text(address!)
             // ),),
-
+                Positioned(
+            top: 120,
+            right: 0,
+            child: GestureDetector(
+              onTap: () async {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) =>  RoutePlannerPage(
+                    userLat: 46.721737025815315, //test location
+                    userLon: 25.594678321650797, // test location
+                    destinationName: name,
+                    destinationLat: latitude,
+                    destinationLon: longitude,
+                  )),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.all(10.0),
+                child: Container(
+                  height: 60,
+                  width: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(25),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x20e2861d),
+                        spreadRadius: 2,
+                        blurRadius: 20,
+                        offset: Offset(0, 0),
+                      ),
+                    ],
+                  ),
+                  child: const Center(
+                    child: FaIcon(
+                      FontAwesomeIcons.route,
+                      size: 25,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
                 Positioned(
                   bottom: 30,
                   left: 0,
