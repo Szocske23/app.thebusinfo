@@ -299,6 +299,8 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
                                 context: context,
                                 backgroundColor: Colors.black,
                                 showDragHandle: true,
+                                isScrollControlled: false,
+                                scrollControlDisabledMaxHeightRatio: 0.8,
                                 shape: const RoundedRectangleBorder(
                                   borderRadius: BorderRadius.vertical(
                                       top: Radius.circular(20)),
@@ -806,26 +808,547 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
 Widget _buildRouteDetailsSheet(
     BuildContext context, Map<String, dynamic> route) {
   return Padding(
-    padding: const EdgeInsets.all(16.0),
-    child: Column(
-      mainAxisSize: MainAxisSize.max,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          "Route Details",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 10),
-        Text("Transfers: ${route['transfers']}"),
-        Text("Price: ${route['price']}"),
-        Text("Departure: ${route['departure_time']}"),
-        // Add more details if needed
-        const SizedBox(height: 10),
-        ElevatedButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text("Close"),
-        ),
-      ],
-    ),
-  );
+      padding: const EdgeInsets.all(16.0),
+      child: route['transfers'] == 0
+          ? Column(
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    const SizedBox(
+                      width: 80,
+                      child: Icon(
+                        FontAwesomeIcons.locationCrosshairs,
+                        color: Colors.blue,
+                        size: 16,
+                      ),
+                    ),
+                    Expanded(
+                        child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          "${route['start_stop']['name']}",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    )),
+                    Text(
+                      "${route['departure_time']}",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Expanded(
+                  child: Row(
+                    children: [
+                      const SizedBox(
+                        width: 80,
+                        child: VerticalDivider(
+                          color: Colors.blue, // Line color
+                          thickness: 2, // Line thickness
+                        ),
+                      ),
+                      Expanded(
+                          child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Text(
+                                "${route['route']}",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const Icon(FontAwesomeIcons.caretRight,
+                                  color: Colors.white),
+                              Text(
+                                "${route['service_name']}",
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 30),
+                          Text(
+                            (() {
+                              final arrivalTime = DateFormat("HH:mm")
+                                  .parse(route['arrival_time']);
+                              final departureTime = DateFormat("HH:mm")
+                                  .parse(route['departure_time']);
+                              final duration =
+                                  arrivalTime.difference(departureTime);
+
+                              return "${duration.inHours}h ${duration.inMinutes.remainder(60)}m";
+                            })(),
+                          ),
+                        ],
+                      )),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "${route['price']}",
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const Text(
+                            "Ron",
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    const SizedBox(
+                      width: 80,
+                      child: Icon(
+                        FontAwesomeIcons.locationDot,
+                        color: Colors.blue,
+                        size: 16,
+                      ),
+                    ),
+                    Expanded(
+                        child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          "${route['end_stop']['name']}",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    )),
+                    Text(
+                      "${route['arrival_time']}",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 160),
+              ],
+            )
+          : Column(
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    const SizedBox(
+                      width: 80,
+                      child: Icon(
+                        FontAwesomeIcons.locationCrosshairs,
+                        color: Colors.blue,
+                        size: 16,
+                      ),
+                    ),
+                    Expanded(
+                        child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          "${route['first_leg']['start_stop']['name']}",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    )),
+                    Text(
+                      "${route['first_leg']['departure_time']}",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Expanded(
+                  child: Row(
+                    children: [
+                      const SizedBox(
+                        width: 80,
+                        child: VerticalDivider(
+                          color: Colors.blue, // Line color
+                          thickness: 2, // Line thickness
+                        ),
+                      ),
+                      Expanded(
+                          child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Text(
+                                "${route['first_leg']['route']}",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const Icon(FontAwesomeIcons.caretRight,
+                                  color: Colors.white),
+                              Text(
+                                "${route['first_leg']['service_name']}",
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      )),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "${route['first_leg']['price']}",
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const Text(
+                            "Ron",
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                        width: 80,
+                        child: route['transfer_type'] == 'walk'
+                            ? const Icon(
+                                FontAwesomeIcons.signHanging,
+                                color: Colors.blue,
+                                size: 16,
+                              )
+                            : const Icon(
+                                FontAwesomeIcons.stopwatch,
+                                color: Colors.white70,
+                                size: 20,
+                              )),
+                    Expanded(
+                        child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "${route['first_leg']['end_stop']['name']}",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        if (route['transfer_type'] == 'same_stop')
+                          Text(
+                            (() {
+                              final arrivalTime = DateFormat("HH:mm")
+                                  .parse(route['second_leg']['departure_time']);
+                              final departureTime = DateFormat("HH:mm")
+                                  .parse(route['first_leg']['arrival_time']);
+                              final duration =
+                                  arrivalTime.difference(departureTime);
+
+                              return "Transfer time: ${duration.inHours}h ${duration.inMinutes.remainder(60)}m";
+                            })(),
+                            style: const TextStyle(
+                              color: Colors.white54,
+                              fontSize: 12,
+                            ),
+                          ),
+                      ],
+                    )),
+                    route['transfer_type'] == 'walk'
+                        ? Text(
+                            "${route['first_leg']['arrival_time']}",
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          )
+                        : Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                "${route['first_leg']['arrival_time']}",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Text(
+                                "${route['second_leg']['departure_time']}",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              )
+                            ],
+                          )
+                  ],
+                ),
+                if (route['transfer_type'] == 'walk')
+                  const SizedBox(height: 10),
+                if (route['transfer_type'] == 'walk')
+                  Expanded(
+                    child: Row(
+                      children: [
+                        const SizedBox(
+                          width: 80,
+                          child: VerticalDivider(
+                            color: Colors.white60, // Line color
+                            thickness: 2, // Line thickness
+                          ),
+                        ),
+                        Expanded(
+                            child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                const Icon(
+                                    FontAwesomeIcons.personWalkingLuggage,
+                                    color: Colors.white),
+                                const SizedBox(width: 10),
+                                Text(
+                                  "${(route['walk_distance'] * 1000).toInt()}m",
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        )),
+                        Text(
+                          (() {
+                            final arrivalTime = DateFormat("HH:mm")
+                                .parse(route['second_leg']['departure_time']);
+                            final departureTime = DateFormat("HH:mm")
+                                .parse(route['first_leg']['arrival_time']);
+                            final duration =
+                                arrivalTime.difference(departureTime);
+
+                            return "${duration.inHours}h ${duration.inMinutes.remainder(60)}m";
+                          })(),
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                const SizedBox(height: 10),
+                if (route['transfer_type'] == 'walk')
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      const SizedBox(
+                        width: 80,
+                        child: Icon(
+                          FontAwesomeIcons.signHanging,
+                          color: Colors.blue,
+                          size: 16,
+                        ),
+                      ),
+                      Expanded(
+                          child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Text(
+                            "${route['second_leg']['start_stop']['name']}",
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      )),
+                      Text(
+                        "${route['second_leg']['departure_time']}",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                Expanded(
+                  child: Row(
+                    children: [
+                      const SizedBox(
+                        width: 80,
+                        child: VerticalDivider(
+                          color: Colors.blue, // Line color
+                          thickness: 2, // Line thickness
+                        ),
+                      ),
+                      Expanded(
+                          child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Text(
+                                "${route['second_leg']['route']}",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const Icon(FontAwesomeIcons.caretRight,
+                                  color: Colors.white),
+                              Text(
+                                "${route['second_leg']['service_name']}",
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                overflow: TextOverflow
+                                    .fade, // adds ellipsis if the text overflows
+                              ),
+                            ],
+                          ),
+                        ],
+                      )),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "${route['second_leg']['price']}",
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const Text(
+                            "Ron",
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    const SizedBox(
+                      width: 80,
+                      child: Icon(
+                        FontAwesomeIcons.locationDot,
+                        color: Colors.blue,
+                        size: 16,
+                      ),
+                    ),
+                    Expanded(
+                        child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          "${route['second_leg']['end_stop']['name']}",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    )),
+                    Text(
+                      "${route['second_leg']['arrival_time']}",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 180),
+              ],
+            ));
 }
