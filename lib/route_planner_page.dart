@@ -12,8 +12,7 @@ class RoutePlannerPage extends StatefulWidget {
   final String? destinationName;
   final double? destinationLat;
   final double? destinationLon;
- 
-  
+
   RoutePlannerPage({
     this.userLat,
     this.userLon,
@@ -29,7 +28,8 @@ class RoutePlannerPage extends StatefulWidget {
 class _RoutePlannerPageState extends State<RoutePlannerPage> {
   // Add any variables or methods related to route planning here
   late DateTime selectedDate;
-  final PageController _controller = PageController(viewportFraction: 0.20,initialPage: 2);
+  final PageController _controller =
+      PageController(viewportFraction: 0.20, initialPage: 2);
 
   List<dynamic>? routes;
   bool isLoading = false; // Track loading state
@@ -38,7 +38,7 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
   @override
   void initState() {
     super.initState();
-     selectedDate = DateTime.now();
+    selectedDate = DateTime.now();
     _checkAndFetchRoute();
   }
 
@@ -102,7 +102,6 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
     return arrival.difference(departure);
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -147,482 +146,522 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
                     final route = routes![index];
 
                     return route['transfers'] == 0
-                        ? Container(
-                            height: 80,
-                            margin: const EdgeInsets.symmetric(vertical: 5),
-                            decoration: const BoxDecoration(
-                              color: Colors.black,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Color.fromARGB(14, 197, 197, 255),
-                                  spreadRadius: 2,
-                                  blurRadius: 20,
-                                  offset: Offset(0, 0),
+                        ? GestureDetector(
+                            onTap: () {
+                              showModalBottomSheet(
+                                context: context,
+                                backgroundColor: Colors.black,
+                                showDragHandle: true,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.vertical(
+                                      top: Radius.circular(20)),
                                 ),
-                              ],
-                            ),
-                            child: Row(
-                              children: [
-                                const SizedBox(width: 10),
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      route['departure_time'],
-                                      style: const TextStyle(
-                                        color: Colors.white70,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                    Text(
-                                      DateFormat("dd MMM")
-                                          .format(DateTime.parse(route['date']))
-                                          .toUpperCase(),
-                                      style: const TextStyle(
-                                        color: Colors.white54,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(width: 14),
-                                Expanded(
-                                    child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          route["route"],
-                                          textAlign: TextAlign.center,
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w700,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const Divider(
-                                      color: Colors.blue,
-                                      thickness: 2,
-                                    ),
-                                    Text(
-                                      (() {
-                                        final arrivalTime = DateFormat("HH:mm")
-                                            .parse(route['arrival_time']);
-                                        final departureTime =
-                                            DateFormat("HH:mm")
-                                                .parse(route['departure_time']);
-                                        final duration = arrivalTime
-                                            .difference(departureTime);
-
-                                        return "${duration.inHours}h ${duration.inMinutes.remainder(60)}m";
-                                      })(),
-                                      style: const TextStyle(
-                                        color: Colors.white54,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ],
-                                )),
-                                const SizedBox(width: 14),
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      route['arrival_time'],
-                                      style: const TextStyle(
-                                        color: Colors.white70,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                    Text(
-                                      DateFormat("dd MMM")
-                                          .format(DateTime.parse(route['date']))
-                                          .toUpperCase(),
-                                      style: const TextStyle(
-                                        color: Colors.white54,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(width: 15),
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      route['price'],
-                                      style: const TextStyle(
-                                        color: Colors.white70,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                    const Text(
-                                      'RON',
-                                      style: TextStyle(
-                                        color: Colors.white54,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(width: 10),
-                              ],
-                            ),
-                          )
-                        : Container(
-                            height: 140,
-                            margin: const EdgeInsets.symmetric(vertical: 5),
-                            decoration: const BoxDecoration(
-                              color: Colors.black,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Color.fromARGB(14, 197, 197, 255),
-                                  spreadRadius: 2,
-                                  blurRadius: 20,
-                                  offset: Offset(0, 0),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              children: [
-                                SizedBox(
-                                  height: 80,
-                                  child: Row(
+                                builder: (context) =>
+                                    _buildRouteDetailsSheet(context, route),
+                              );
+                            },
+                            child: Container(
+                              height: 80,
+                              margin: const EdgeInsets.symmetric(vertical: 5),
+                              decoration: const BoxDecoration(
+                                color: Colors.black,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Color.fromARGB(14, 197, 197, 255),
+                                    spreadRadius: 2,
+                                    blurRadius: 20,
+                                    offset: Offset(0, 0),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                children: [
+                                  const SizedBox(width: 10),
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      const SizedBox(width: 10),
-                                      Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            route['first_leg']
-                                                ['departure_time'],
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                          Text(
-                                            DateFormat("dd MMM")
-                                                .format(DateTime.parse(
-                                                    route['first_leg']['date']))
-                                                .toUpperCase(),
-                                            style: const TextStyle(
-                                              color: Colors.white54,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ],
+                                      Text(
+                                        route['departure_time'],
+                                        style: const TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 14,
+                                        ),
                                       ),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                          child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                route['first_leg']['route'],
-                                                textAlign: TextAlign.center,
-                                                style: const TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: Colors.white70,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          const Divider(
-                                            color: Colors.blue,
-                                            thickness: 2,
-                                          ),
-                                          Text(
-                                            (() {
-                                              final arrivalTime =
-                                                  DateFormat("HH:mm").parse(
-                                                      route['first_leg']
-                                                          ['arrival_time']);
-                                              final departureTime =
-                                                  DateFormat("HH:mm").parse(
-                                                      route['first_leg']
-                                                          ['departure_time']);
-                                              final duration = arrivalTime
-                                                  .difference(departureTime);
-
-                                              return "${duration.inHours}h ${duration.inMinutes.remainder(60)}m";
-                                            })(),
-                                            style: const TextStyle(
-                                              color: Colors.white54,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ],
-                                      )),
-                                      const SizedBox(width: 10),
-                                      if (route['walk_distance'] == 0)
-                                        SizedBox(
-                                            width: 50,
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              children: [
-                                                const Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  children: [
-                                                    Padding(
-                                                      padding:
-                                                          EdgeInsets.all(3),
-                                                      child: Icon(
-                                                          FontAwesomeIcons
-                                                              .stopwatch,
-                                                          color: Colors.white70,
-                                                          size: 14),
-                                                    )
-                                                  ],
-                                                ),
-                                                const Divider(
-                                                  color: Colors.grey,
-                                                  thickness: 2,
-                                                ),
-                                                Text(
-                                                  (() {
-                                                    final arrivalTime = DateFormat(
-                                                            "HH:mm")
-                                                        .parse(route[
-                                                                'second_leg']
-                                                            ['departure_time']);
-                                                    final departureTime =
-                                                        DateFormat("HH:mm")
-                                                            .parse(route[
-                                                                    'first_leg']
-                                                                [
-                                                                'arrival_time']);
-                                                    final duration =
-                                                        arrivalTime.difference(
-                                                            departureTime);
-
-                                                    return "${duration.inHours}h ${duration.inMinutes.remainder(60)}m";
-                                                  })(),
-                                                  style: const TextStyle(
-                                                    color: Colors.white54,
-                                                    fontSize: 12,
-                                                  ),
-                                                ),
-                                              ],
-                                            )),
-                                      if (route['walk_distance'] > 0)
-                                        SizedBox(
-                                            width: 50,
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              children: [
-                                                const Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  children: [
-                                                    Icon(
-                                                        FontAwesomeIcons
-                                                            .personWalkingLuggage,
-                                                        color: Colors.white70,
-                                                        size: 20),
-                                                  ],
-                                                ),
-                                                const Divider(
-                                                  color: Colors.grey,
-                                                  thickness: 2,
-                                                ),
-                                                Text(
-                                                  (() {
-                                                    final arrivalTime = DateFormat(
-                                                            "HH:mm")
-                                                        .parse(route[
-                                                                'second_leg']
-                                                            ['departure_time']);
-                                                    final departureTime =
-                                                        DateFormat("HH:mm")
-                                                            .parse(route[
-                                                                    'first_leg']
-                                                                [
-                                                                'arrival_time']);
-                                                    final duration =
-                                                        arrivalTime.difference(
-                                                            departureTime);
-
-                                                    return "${duration.inHours}h ${duration.inMinutes.remainder(60)}m";
-                                                  })(),
-                                                  style: const TextStyle(
-                                                    color: Colors.white54,
-                                                    fontSize: 12,
-                                                  ),
-                                                ),
-                                              ],
-                                            )),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                          child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                route['second_leg']['route'],
-                                                textAlign: TextAlign.center,
-                                                style: const TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: Colors.white70,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          const Divider(
-                                            color: Colors.blue,
-                                            thickness: 2,
-                                          ),
-                                          Text(
-                                            (() {
-                                              final arrivalTime =
-                                                  DateFormat("HH:mm").parse(
-                                                      route['second_leg']
-                                                          ['arrival_time']);
-                                              final departureTime =
-                                                  DateFormat("HH:mm").parse(
-                                                      route['second_leg']
-                                                          ['departure_time']);
-                                              final duration = arrivalTime
-                                                  .difference(departureTime);
-
-                                              return "${duration.inHours}h ${duration.inMinutes.remainder(60)}m";
-                                            })(),
-                                            style: const TextStyle(
-                                              color: Colors.white54,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ],
-                                      )),
-                                      const SizedBox(width: 10),
-                                      Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            route['second_leg']['arrival_time'],
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                          Text(
-                                            DateFormat("dd MMM")
-                                                .format(DateTime.parse(
-                                                    route['second_leg']
-                                                        ['date']))
-                                                .toUpperCase(),
-                                            style: const TextStyle(
-                                              color: Colors.white54,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ],
+                                      Text(
+                                        DateFormat("dd MMM")
+                                            .format(
+                                                DateTime.parse(route['date']))
+                                            .toUpperCase(),
+                                        style: const TextStyle(
+                                          color: Colors.white54,
+                                          fontSize: 12,
+                                        ),
                                       ),
-                                      const SizedBox(width: 20),
-                                      Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          const Text(
-                                            'Pret',
-                                            style: TextStyle(
-                                              color: Colors.white54,
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                          Text(
-                                            '${(double.parse(route['first_leg']['price']) + double.parse(route['second_leg']['price']))}',
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(width: 10),
                                     ],
                                   ),
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                      child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            route["route"],
+                                            textAlign: TextAlign.center,
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w700,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const Divider(
+                                        color: Colors.blue,
+                                        thickness: 2,
+                                      ),
+                                      Text(
+                                        (() {
+                                          final arrivalTime =
+                                              DateFormat("HH:mm")
+                                                  .parse(route['arrival_time']);
+                                          final departureTime =
+                                              DateFormat("HH:mm").parse(
+                                                  route['departure_time']);
+                                          final duration = arrivalTime
+                                              .difference(departureTime);
+
+                                          return "${duration.inHours}h ${duration.inMinutes.remainder(60)}m";
+                                        })(),
+                                        style: const TextStyle(
+                                          color: Colors.white54,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  )),
+                                  const SizedBox(width: 14),
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        route['arrival_time'],
+                                        style: const TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      Text(
+                                        DateFormat("dd MMM")
+                                            .format(
+                                                DateTime.parse(route['date']))
+                                            .toUpperCase(),
+                                        style: const TextStyle(
+                                          color: Colors.white54,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(width: 15),
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        route['price'],
+                                        style: const TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      const Text(
+                                        'RON',
+                                        style: TextStyle(
+                                          color: Colors.white54,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(width: 10),
+                                ],
+                              ),
+                            ),
+                          )
+                        : GestureDetector(
+                            onTap: () {
+                              showModalBottomSheet(
+                                context: context,
+                                backgroundColor: Colors.black,
+                                showDragHandle: true,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.vertical(
+                                      top: Radius.circular(20)),
                                 ),
-                                const Divider(
-                                  color: Colors.white24,
-                                  thickness: 1,
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                        child: Column(
+                                builder: (context) =>
+                                    _buildRouteDetailsSheet(context, route),
+                              );
+                            },
+                            child: Container(
+                              height: 140,
+                              margin: const EdgeInsets.symmetric(vertical: 5),
+                              decoration: const BoxDecoration(
+                                color: Colors.black,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Color.fromARGB(14, 197, 197, 255),
+                                    spreadRadius: 2,
+                                    blurRadius: 20,
+                                    offset: Offset(0, 0),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                children: [
+                                  SizedBox(
+                                    height: 80,
+                                    child: Row(
                                       children: [
-                                        if (route['transfer_type'] ==
-                                            'same_stop')
-                                          const Text(
-                                            'Schimbare la aceeași stație',
-                                            style: TextStyle(
-                                              color: Colors.white54,
-                                              fontSize: 14,
+                                        const SizedBox(width: 10),
+                                        Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              route['first_leg']
+                                                  ['departure_time'],
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 14,
+                                              ),
                                             ),
-                                          ),
-                                        if (route['transfer_type'] ==
-                                            'same_stop')
-                                          Text(
-                                            route['transfer_stop'],
-                                            style: const TextStyle(
-                                              color: Colors.white54,
-                                              fontSize: 14,
+                                            Text(
+                                              DateFormat("dd MMM")
+                                                  .format(DateTime.parse(
+                                                      route['first_leg']
+                                                          ['date']))
+                                                  .toUpperCase(),
+                                              style: const TextStyle(
+                                                color: Colors.white54,
+                                                fontSize: 12,
+                                              ),
                                             ),
-                                          ),
-                                        if (route['transfer_type'] == 'walk')
-                                          Text(
-                                            'Mers pe jos ${(route['walk_distance'] * 1000).toInt()}m',
-                                            style: const TextStyle(
-                                              color: Colors.white54,
-                                              fontSize: 14,
+                                          ],
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                            child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  route['first_leg']['route'],
+                                                  textAlign: TextAlign.center,
+                                                  style: const TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Colors.white70,
+                                                  ),
+                                                ),
+                                              ],
                                             ),
-                                          ),
-                                        if (route['transfer_type'] == 'walk')
-                                          Text(
-                                            'intre statile ${route['first_leg']['end_stop']['name']} si ${route['second_leg']['start_stop']['name']}',
-                                            style: const TextStyle(
-                                              color: Colors.white54,
-                                              fontSize: 14,
+                                            const Divider(
+                                              color: Colors.blue,
+                                              thickness: 2,
                                             ),
-                                          ),
+                                            Text(
+                                              (() {
+                                                final arrivalTime =
+                                                    DateFormat("HH:mm").parse(
+                                                        route['first_leg']
+                                                            ['arrival_time']);
+                                                final departureTime =
+                                                    DateFormat("HH:mm").parse(
+                                                        route['first_leg']
+                                                            ['departure_time']);
+                                                final duration = arrivalTime
+                                                    .difference(departureTime);
+
+                                                return "${duration.inHours}h ${duration.inMinutes.remainder(60)}m";
+                                              })(),
+                                              style: const TextStyle(
+                                                color: Colors.white54,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ],
+                                        )),
+                                        const SizedBox(width: 10),
+                                        if (route['walk_distance'] == 0)
+                                          SizedBox(
+                                              width: 50,
+                                              child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
+                                                children: [
+                                                  const Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      Padding(
+                                                        padding:
+                                                            EdgeInsets.all(3),
+                                                        child: Icon(
+                                                            FontAwesomeIcons
+                                                                .stopwatch,
+                                                            color:
+                                                                Colors.white70,
+                                                            size: 14),
+                                                      )
+                                                    ],
+                                                  ),
+                                                  const Divider(
+                                                    color: Colors.grey,
+                                                    thickness: 2,
+                                                  ),
+                                                  Text(
+                                                    (() {
+                                                      final arrivalTime = DateFormat(
+                                                              "HH:mm")
+                                                          .parse(route[
+                                                                  'second_leg'][
+                                                              'departure_time']);
+                                                      final departureTime =
+                                                          DateFormat("HH:mm")
+                                                              .parse(route[
+                                                                      'first_leg']
+                                                                  [
+                                                                  'arrival_time']);
+                                                      final duration =
+                                                          arrivalTime.difference(
+                                                              departureTime);
+
+                                                      return "${duration.inHours}h ${duration.inMinutes.remainder(60)}m";
+                                                    })(),
+                                                    style: const TextStyle(
+                                                      color: Colors.white54,
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
+                                                ],
+                                              )),
+                                        if (route['walk_distance'] > 0)
+                                          SizedBox(
+                                              width: 50,
+                                              child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
+                                                children: [
+                                                  const Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      Icon(
+                                                          FontAwesomeIcons
+                                                              .personWalkingLuggage,
+                                                          color: Colors.white70,
+                                                          size: 20),
+                                                    ],
+                                                  ),
+                                                  const Divider(
+                                                    color: Colors.grey,
+                                                    thickness: 2,
+                                                  ),
+                                                  Text(
+                                                    (() {
+                                                      final arrivalTime = DateFormat(
+                                                              "HH:mm")
+                                                          .parse(route[
+                                                                  'second_leg'][
+                                                              'departure_time']);
+                                                      final departureTime =
+                                                          DateFormat("HH:mm")
+                                                              .parse(route[
+                                                                      'first_leg']
+                                                                  [
+                                                                  'arrival_time']);
+                                                      final duration =
+                                                          arrivalTime.difference(
+                                                              departureTime);
+
+                                                      return "${duration.inHours}h ${duration.inMinutes.remainder(60)}m";
+                                                    })(),
+                                                    style: const TextStyle(
+                                                      color: Colors.white54,
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
+                                                ],
+                                              )),
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                            child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  route['second_leg']['route'],
+                                                  textAlign: TextAlign.center,
+                                                  style: const TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Colors.white70,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const Divider(
+                                              color: Colors.blue,
+                                              thickness: 2,
+                                            ),
+                                            Text(
+                                              (() {
+                                                final arrivalTime =
+                                                    DateFormat("HH:mm").parse(
+                                                        route['second_leg']
+                                                            ['arrival_time']);
+                                                final departureTime =
+                                                    DateFormat("HH:mm").parse(
+                                                        route['second_leg']
+                                                            ['departure_time']);
+                                                final duration = arrivalTime
+                                                    .difference(departureTime);
+
+                                                return "${duration.inHours}h ${duration.inMinutes.remainder(60)}m";
+                                              })(),
+                                              style: const TextStyle(
+                                                color: Colors.white54,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ],
+                                        )),
+                                        const SizedBox(width: 10),
+                                        Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              route['second_leg']
+                                                  ['arrival_time'],
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                            Text(
+                                              DateFormat("dd MMM")
+                                                  .format(DateTime.parse(
+                                                      route['second_leg']
+                                                          ['date']))
+                                                  .toUpperCase(),
+                                              style: const TextStyle(
+                                                color: Colors.white54,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(width: 20),
+                                        Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            const Text(
+                                              'Pret',
+                                              style: TextStyle(
+                                                color: Colors.white54,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                            Text(
+                                              '${(double.parse(route['first_leg']['price']) + double.parse(route['second_leg']['price']))}',
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(width: 10),
                                       ],
-                                    ))
-                                  ],
-                                )
-                              ],
+                                    ),
+                                  ),
+                                  const Divider(
+                                    color: Colors.white24,
+                                    thickness: 1,
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                          child: Column(
+                                        children: [
+                                          if (route['transfer_type'] ==
+                                              'same_stop')
+                                            const Text(
+                                              'Schimbare la aceeași stație',
+                                              style: TextStyle(
+                                                color: Colors.white54,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          if (route['transfer_type'] ==
+                                              'same_stop')
+                                            Text(
+                                              route['transfer_stop'],
+                                              style: const TextStyle(
+                                                color: Colors.white54,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          if (route['transfer_type'] == 'walk')
+                                            Text(
+                                              'Mers pe jos ${(route['walk_distance'] * 1000).toInt()}m',
+                                              style: const TextStyle(
+                                                color: Colors.white54,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          if (route['transfer_type'] == 'walk')
+                                            Text(
+                                              'intre statile ${route['first_leg']['end_stop']['name']} si ${route['second_leg']['start_stop']['name']}',
+                                              style: const TextStyle(
+                                                color: Colors.white54,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                        ],
+                                      ))
+                                    ],
+                                  )
+                                ],
+                              ),
                             ),
                           ); // or any other widget for routes with transfers
                   },
@@ -630,76 +669,69 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
               ),
             ),
 
-
           Positioned(
-      bottom: 100,
-      left: 0,
-      right: 0,
-      child: SizedBox(
-        height: 90,
-        child: PageView.builder(
-          itemCount: 10, // Next 10 days
-          controller: _controller,
-          itemBuilder: (context, index) {
-            DateTime date = DateTime.now().add(Duration(days: index));
+            bottom: 100,
+            left: 0,
+            right: 0,
+            child: SizedBox(
+              height: 90,
+              child: PageView.builder(
+                itemCount: 10, // Next 10 days
+                controller: _controller,
+                itemBuilder: (context, index) {
+                  DateTime date = DateTime.now().add(Duration(days: index));
 
-            return GestureDetector(
-              onTap: () {
-                setState(() {
-                  selectedDate = date;
-                  routes = []; // No routes available
-                });
-                _fetchRoute();
-                
-                
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                    side: BorderSide(
-                      color: selectedDate.year == date.year &&
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        selectedDate = date;
+                        routes = []; // No routes available
+                      });
+                      _fetchRoute();
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25),
+                          side: BorderSide(
+                            color: selectedDate.year == date.year &&
                                     selectedDate.month == date.month &&
                                     selectedDate.day == date.day
                                 ? Colors.white
-                                : Colors.transparent,// White border for selected date
-                      width: 2, // Border width
-                    ),
-                  ),
-                  color: Colors.black,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children:[
-                      Text(
-                      DateFormat('dd').format(date),
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                                : Colors
+                                    .transparent, // White border for selected date
+                            width: 2, // Border width
+                          ),
+                        ),
+                        color: Colors.black,
+                        child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                DateFormat('dd').format(date),
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              Text(
+                                DateFormat('MMM').format(date),
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.white70,
+                                ),
+                              ),
+                            ]),
                       ),
                     ),
-                    Text(
-                      DateFormat('MMM').format(date),
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.white70 ,
-                      ),
-                    ),
-
-                    ] 
-                  ),
-                ),
+                  );
+                },
               ),
-            );
-          },
-        ),
-      ),
+            ),
           ),
-
-
-
 
           Positioned(
             bottom: 30,
@@ -769,4 +801,31 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
       ),
     );
   }
+}
+
+Widget _buildRouteDetailsSheet(
+    BuildContext context, Map<String, dynamic> route) {
+  return Padding(
+    padding: const EdgeInsets.all(16.0),
+    child: Column(
+      mainAxisSize: MainAxisSize.max,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          "Route Details",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        Text("Transfers: ${route['transfers']}"),
+        Text("Price: ${route['price']}"),
+        Text("Departure: ${route['departure_time']}"),
+        // Add more details if needed
+        const SizedBox(height: 10),
+        ElevatedButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text("Close"),
+        ),
+      ],
+    ),
+  );
 }
