@@ -15,7 +15,7 @@ import 'tickets_page.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'signin_page.dart';
 import 'package:uuid/uuid.dart';
-
+import 'package:package_info_plus/package_info_plus.dart';
 
 Future<bool> validateToken() async {
   final tokens = await AuthStorage.getTokens();
@@ -87,6 +87,7 @@ class AuthStorage {
 class _HomeScreenState extends State<HomeScreen> {
   late MapboxMap mapboxMap;
   final Location location = Location();
+
   // ignore: unused_field
   LocationData? _currentLocation;
   PointAnnotationManager? pointAnnotationManager;
@@ -94,12 +95,15 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> closestStops = [];
   Timer? debounceTimer;
   PointAnnotation? locationIndicator; // Custom location marker
-  String mapboxSessionToken = const Uuid().v4(); // Generate and store a session token
+  String mapboxSessionToken =
+      const Uuid().v4(); // Generate and store a session token
 
   List<Map<String, dynamic>> searchStops = [];
   List<Map<String, dynamic>> searchCityes = [];
   List<Map<String, dynamic>> searchPois = [];
   TextEditingController searchController = TextEditingController();
+  String appVersion = "Loading...";
+  String appBuildNumber = "Loading...";
 
   static const String stopsApiUrl = 'https://api.thebus.info/v1/stops';
 
@@ -108,6 +112,12 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     debounceTimer?.cancel();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchAppInfo();
   }
 
   Future<void> _onMapCreated(MapboxMap mapboxMap) async {
@@ -282,38 +292,41 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
- Future<void> fetchSearchResults(String query) async {
-  if (query.length < 3) {
-    searchStops = [];
-    searchCityes = [];
-    searchPois = [];
-    return;
-  }
-
-  try {
-    final response = await http.get(Uri.https(
-      'api.thebus.info',
-      '/v1/search',
-      {'query': query, 'mapbox_session_token': mapboxSessionToken}, // Include session token
-    ));
-
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      print(data);
-      setState(() {
-        searchStops = List<Map<String, dynamic>>.from(data['stops']);
-        print(searchStops);
-        searchCityes = List<Map<String, dynamic>>.from(data['cities']);
-        print(searchCityes);
-        searchPois = List<Map<String, dynamic>>.from(data['pois']);
-        print(searchPois);
-      });
+  Future<void> fetchSearchResults(String query) async {
+    if (query.length < 3) {
+      searchStops = [];
+      searchCityes = [];
+      searchPois = [];
+      return;
     }
-  } catch (e) {
-    print(e);
-    _showError('Search failed: $e');
+
+    try {
+      final response = await http.get(Uri.https(
+        'api.thebus.info',
+        '/v1/search',
+        {
+          'query': query,
+          'mapbox_session_token': mapboxSessionToken
+        }, // Include session token
+      ));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        print(data);
+        setState(() {
+          searchStops = List<Map<String, dynamic>>.from(data['stops']);
+          print(searchStops);
+          searchCityes = List<Map<String, dynamic>>.from(data['cities']);
+          print(searchCityes);
+          searchPois = List<Map<String, dynamic>>.from(data['pois']);
+          print(searchPois);
+        });
+      }
+    } catch (e) {
+      print(e);
+      _showError('Search failed: $e');
+    }
   }
-}
 
   Future<void> _updateCamera(LocationData locationData) async {
     if (locationData.latitude != null && locationData.longitude != null) {
@@ -352,6 +365,14 @@ class _HomeScreenState extends State<HomeScreen> {
         .showSnackBar(SnackBar(content: Text(message)));
   }
 
+  Future<void> _fetchAppInfo() async {
+    final packageInfo = await PackageInfo.fromPlatform();
+    setState(() {
+      appVersion = packageInfo.version;
+      appBuildNumber = packageInfo.buildNumber;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -376,10 +397,21 @@ class _HomeScreenState extends State<HomeScreen> {
             top: 50,
             right: 0,
             child: GestureDetector(
-              onTap: () async {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SettingsPage()),
+              onTap: () {
+                // Show bottom sheet instead of navigating to a new page
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: false,
+                  showDragHandle: true,
+                  backgroundColor: Color(0xFF0A131F),
+                  isDismissible: true,
+                  scrollControlDisabledMaxHeightRatio: 0.8,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.vertical(
+                                      top: Radius.circular(45)),
+                                ),
+                  builder: (context) => _buildSettingsBottomSheet(
+                      context, appVersion, appBuildNumber),
                 );
               },
               child: Container(
@@ -404,44 +436,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       FontAwesomeIcons.gear,
                       size: 25,
                       color: Colors.grey,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            top: 120,
-            right: 0,
-            child: GestureDetector(
-              onTap: () async {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) =>  RoutePlannerPage()),
-                );
-              },
-              child: Container(
-                padding: const EdgeInsets.all(10.0),
-                child: Container(
-                  height: 60,
-                  width: 60,
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(25),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x20e2861d),
-                        spreadRadius: 2,
-                        blurRadius: 20,
-                        offset: Offset(0, 0),
-                      ),
-                    ],
-                  ),
-                  child: const Center(
-                    child: FaIcon(
-                      FontAwesomeIcons.route,
-                      size: 25,
-                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -599,7 +593,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             return Padding(
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 7),
-                                child: _buildSearchCard(stop, 'Stop', context, mapboxSessionToken));
+                                child: _buildSearchCard(
+                                    stop, 'Stop', context, mapboxSessionToken));
                           },
                         ),
                       ),
@@ -615,7 +610,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             return Padding(
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 7),
-                                child: _buildSearchCard(city, 'City', context, mapboxSessionToken));
+                                child: _buildSearchCard(
+                                    city, 'City', context, mapboxSessionToken));
                           },
                         ),
                       ),
@@ -632,7 +628,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             return Padding(
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 7),
-                                child: _buildSearchCard(poi, 'POI', context, mapboxSessionToken));
+                                child: _buildSearchCard(
+                                    poi, 'POI', context, mapboxSessionToken));
                           },
                         ),
                       ),
@@ -697,39 +694,38 @@ Widget _buildStopView(BuildContext context, Map<String, dynamic> stop) {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-               
               SizedBox(
-  width: MediaQuery.of(context).size.width * 0.88 - 110, // Adjusted for padding  // Ensures Row has a bounded width
-  child: Row(
-    children: [
-      Text(
-        '${stop["name"]} - ', // Stop name always fully visible
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
-      ),
-      Expanded(
-        child: Align(
-          alignment: Alignment.centerLeft, // Ensures proper fading effect
-          child: Text(
-            '${stop["city"]}', // City fades if too long
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.white70,
-            ),
-            overflow: TextOverflow.fade,
-            softWrap: false,
-          ),
-        ),
-      ),
-    ],
-  ),
-),
-              
-               
+                width: MediaQuery.of(context).size.width * 0.88 -
+                    110, // Adjusted for padding  // Ensures Row has a bounded width
+                child: Row(
+                  children: [
+                    Text(
+                      '${stop["name"]} - ', // Stop name always fully visible
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment
+                            .centerLeft, // Ensures proper fading effect
+                        child: Text(
+                          '${stop["city"]}', // City fades if too long
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white70,
+                          ),
+                          overflow: TextOverflow.fade,
+                          softWrap: false,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               Text(
                 '${(stop["distance"] * 1000).toStringAsFixed(0)} m',
                 // ignore: avoid_print
@@ -831,7 +827,8 @@ Color hexStringToColor(String hexColor) {
   return Color(int.parse(buffer.toString(), radix: 16));
 }
 
-Widget _buildSearchCard(dynamic item, String type, BuildContext context, String mapboxSessionToken) {
+Widget _buildSearchCard(dynamic item, String type, BuildContext context,
+    String mapboxSessionToken) {
   return GestureDetector(
     onTap: () {
       if (type == 'Stop') {
@@ -846,7 +843,8 @@ Widget _buildSearchCard(dynamic item, String type, BuildContext context, String 
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => PoiDetailsPage(sessionToken: mapboxSessionToken ,poiUid: item['id']),
+            builder: (context) => PoiDetailsPage(
+                sessionToken: mapboxSessionToken, poiUid: item['id']),
           ),
         );
       }
@@ -1052,3 +1050,50 @@ Widget _buildSearchCard(dynamic item, String type, BuildContext context, String 
   //   ),
   // ),
 }
+
+Widget _buildSettingsBottomSheet(
+    BuildContext context, String appVersion, String appBuildNumber) {
+  
+      return Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFF0A131F),
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(25),
+            topRight: Radius.circular(25),
+          ),
+          
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(child: Text('expanded')),
+            // Drag handle
+            
+            // Settings title
+            
+            // Version info
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Text(
+                      "Version $appVersion (Build $appBuildNumber)",
+                      style: const TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      "© 2025 Prosoft.plus",
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 20,)
+          ],
+        ),
+      );
+    }
+ 

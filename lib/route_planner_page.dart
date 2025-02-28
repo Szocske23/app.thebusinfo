@@ -154,7 +154,7 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
                                 showDragHandle: true,
                                 shape: const RoundedRectangleBorder(
                                   borderRadius: BorderRadius.vertical(
-                                      top: Radius.circular(20)),
+                                      top: Radius.circular(45)),
                                 ),
                                 builder: (context) =>
                                     _buildRouteDetailsSheet(context, route),
