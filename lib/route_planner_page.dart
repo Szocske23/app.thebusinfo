@@ -841,16 +841,15 @@ Widget _buildRouteDetailsSheet(
                     )),
                     SizedBox(
                       width: 80,
-                      child:
-                    Text(
-                      "${route['departure_time']}",
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                      child: Text(
+                        "${route['departure_time']}",
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
                     ),
                   ],
                 ),
@@ -893,37 +892,34 @@ Widget _buildRouteDetailsSheet(
                               ),
                             ],
                           ),
-                          
                         ],
                       )),
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           SizedBox(
-                      width: 80,
-                      child:
-                          Text(
-                            "${route['price']}",
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
+                            width: 80,
+                            child: Text(
+                              "${route['price']}",
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                          ),
                           ),
                           const SizedBox(
-                      width: 80,
-                      child:
-                          Text(
-                            "Ron",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
+                            width: 80,
+                            child: Text(
+                              "Ron",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
-                          ),
                           ),
                         ],
                       ),
@@ -958,20 +954,52 @@ Widget _buildRouteDetailsSheet(
                     )),
                     SizedBox(
                       width: 80,
-                      child:
-                    Text(
-                      "${route['arrival_time']}",
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                      child: Text(
+                        "${route['arrival_time']}",
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 160),
+                const SizedBox(height: 15),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Divider(
+                    color: Colors.white24,
+                    thickness: 2,
+                  ),
+                ),
+                 const SizedBox(height: 15),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start, // Aligns text to top
+                    children: [
+                       SizedBox(width: 14),
+                      Icon(FontAwesomeIcons.circleInfo,
+                          color: Colors.white54, size: 18),
+                      SizedBox(width: 14), // Adds spacing between icon and text
+                      Expanded(
+                        // Ensures text wraps properly
+                        child: Text(
+                          'Rezarvarile se fac cu minim 24 ore inainte si isi pierd valabilitatea cu 15 minute inainte de plecare. Reducerile sunt valabile doar pentru biletele cumparate online. Conducatorul auto si transportatorul nu raspund de bagaje si continutul lor.',
+                          style: TextStyle(
+                            color: Colors.white54,
+                            fontSize: 12,
+                          ),
+                          softWrap: true,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 50),
                 Row(
                   children: [
                     GestureDetector(
@@ -1003,8 +1031,8 @@ Widget _buildRouteDetailsSheet(
                           borderRadius: BorderRadius.all(Radius.circular(25)),
                           color: Colors.black,
                         ),
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 20),
+                        child:  Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -1012,8 +1040,8 @@ Widget _buildRouteDetailsSheet(
                               Flexible(
                                 // Ensures proper text overflow handling
                                 child: Text(
-                                  'Cumpara',
-                                  style: TextStyle(
+                                  'Cumpara la ${route['price']} Ron',
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -1032,7 +1060,7 @@ Widget _buildRouteDetailsSheet(
                     ),
                   ],
                 ),
-                 const SizedBox(height: 25),
+                const SizedBox(height: 25),
               ],
             )
           : Column(
@@ -1066,16 +1094,15 @@ Widget _buildRouteDetailsSheet(
                     )),
                     SizedBox(
                       width: 80,
-                      child:
-                    Text(
-                      "${route['first_leg']['departure_time']}",
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                      child: Text(
+                        "${route['first_leg']['departure_time']}",
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
                     ),
                   ],
                 ),
@@ -1120,41 +1147,36 @@ Widget _buildRouteDetailsSheet(
                           ),
                         ],
                       )),
-                      
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           SizedBox(
-                      width: 80,
-                      child:
-                          Text(
-                            "${route['first_leg']['price']}",
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
+                            width: 80,
+                            child: Text(
+                              "${route['first_leg']['price']}",
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                          ),
                           ),
                           const SizedBox(
-                      width: 80,
-                      child:
-                          Text(
-                            "Ron",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
+                            width: 80,
+                            child: Text(
+                              "Ron",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
-                          ),
                           ),
                         ],
                       ),
-                      
-                  
                     ],
                   ),
                 ),
@@ -1208,57 +1230,46 @@ Widget _buildRouteDetailsSheet(
                       ],
                     )),
                     route['transfer_type'] == 'walk'
-
-                        ? 
-                        SizedBox(
-                      width: 80,
-                      child:
-                        Text(
-                            "${route['first_leg']['arrival_time']}",
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          )
-                        )
-                        : 
-                       
-                      
-                        Column(
+                        ? SizedBox(
+                            width: 80,
+                            child: Text(
+                              "${route['first_leg']['arrival_time']}",
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ))
+                        : Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               SizedBox(
-                      width: 80,
-                      child:
-                              Text(
-                                "${route['first_leg']['arrival_time']}",
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
+                                width: 80,
+                                child: Text(
+                                  "${route['first_leg']['arrival_time']}",
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
-                              ),
                               ),
                               SizedBox(
-                      width: 80,
-                      child:
-                              Text(
-                                "${route['second_leg']['departure_time']}",
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              )
-                              ),
+                                  width: 80,
+                                  child: Text(
+                                    "${route['second_leg']['departure_time']}",
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  )),
                             ],
                           )
-                      
                   ],
                 ),
                 if (route['transfer_type'] == 'walk')
@@ -1286,7 +1297,6 @@ Widget _buildRouteDetailsSheet(
                                     FontAwesomeIcons.personWalkingLuggage,
                                     color: Colors.white),
                                 const SizedBox(width: 10),
-                                
                                 Text(
                                   "${(route['walk_distance'] * 1000).toInt()}m",
                                   textAlign: TextAlign.center,
@@ -1301,26 +1311,25 @@ Widget _buildRouteDetailsSheet(
                           ],
                         )),
                         SizedBox(
-                      width: 80,
-                      child:
-                        Text(
-                          (() {
-                            final arrivalTime = DateFormat("HH:mm")
-                                .parse(route['second_leg']['departure_time']);
-                            final departureTime = DateFormat("HH:mm")
-                                .parse(route['first_leg']['arrival_time']);
-                            final duration =
-                                arrivalTime.difference(departureTime);
+                          width: 80,
+                          child: Text(
+                            (() {
+                              final arrivalTime = DateFormat("HH:mm")
+                                  .parse(route['second_leg']['departure_time']);
+                              final departureTime = DateFormat("HH:mm")
+                                  .parse(route['first_leg']['arrival_time']);
+                              final duration =
+                                  arrivalTime.difference(departureTime);
 
-                            return "${duration.inHours}h ${duration.inMinutes.remainder(60)}m";
-                          })(),
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                              return "${duration.inHours}h ${duration.inMinutes.remainder(60)}m";
+                            })(),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
                         ),
                       ],
                     ),
@@ -1353,17 +1362,16 @@ Widget _buildRouteDetailsSheet(
                         ],
                       )),
                       SizedBox(
-                      width: 80,
-                      child:
-                      Text(
-                        "${route['second_leg']['departure_time']}",
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                        width: 80,
+                        child: Text(
+                          "${route['second_leg']['departure_time']}",
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
                       ),
                     ],
                   ),
@@ -1409,44 +1417,39 @@ Widget _buildRouteDetailsSheet(
                           ),
                         ],
                       )),
-                      
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           SizedBox(
-                      width: 80,
-                      child:
-                          Text(
-                            "${route['second_leg']['price']}",
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
+                            width: 80,
+                            child: Text(
+                              "${route['second_leg']['price']}",
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                          ),
                           ),
                           const SizedBox(
-                      width: 80,
-                      child:
-                           Text(
-                            "Ron",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              
+                            width: 80,
+                            child: Text(
+                              "Ron",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
-                          ),
                           ),
                         ],
                       ),
-                      
                     ],
                   ),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -1474,20 +1477,52 @@ Widget _buildRouteDetailsSheet(
                     )),
                     SizedBox(
                       width: 80,
-                      child:
-                    Text(
-                      "${route['second_leg']['arrival_time']}",
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                      child: Text(
+                        "${route['second_leg']['arrival_time']}",
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 180),
+                const SizedBox(height: 15),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Divider(
+                    color: Colors.white24,
+                    thickness: 2,
+                  ),
+                ),
+                 const SizedBox(height: 15),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start, // Aligns text to top
+                    children: [
+                       SizedBox(width: 14),
+                      Icon(FontAwesomeIcons.circleInfo,
+                          color: Colors.white54, size: 18),
+                      SizedBox(width: 14), // Adds spacing between icon and text
+                      Expanded(
+                        // Ensures text wraps properly
+                        child: Text(
+                          'Rezarvarile se fac cu minim 24 ore inainte si isi pierd valabilitatea cu 15 minute inainte de plecare. Reducerile sunt valabile doar pentru biletele cumparate online. Conducatorul auto si transportatorul nu raspund de bagaje si continutul lor.',
+                          style: TextStyle(
+                            color: Colors.white54,
+                            fontSize: 12,
+                          ),
+                          softWrap: true,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 50),
                 Row(
                   children: [
                     GestureDetector(
@@ -1519,8 +1554,8 @@ Widget _buildRouteDetailsSheet(
                           borderRadius: BorderRadius.all(Radius.circular(25)),
                           color: Colors.black,
                         ),
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 20),
+                        child:  Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -1528,8 +1563,8 @@ Widget _buildRouteDetailsSheet(
                               Flexible(
                                 // Ensures proper text overflow handling
                                 child: Text(
-                                  'Cumpara',
-                                  style: TextStyle(
+                                  'Cumpara la ${(double.parse(route['first_leg']['price']) + double.parse(route['second_leg']['price']))} Ron',
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
