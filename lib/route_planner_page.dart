@@ -105,7 +105,7 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 7, 7, 7),
+      backgroundColor: const Color(0xFF0A131F),
       body: Stack(
         children: [
           //   Positioned.fill(
@@ -150,7 +150,7 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
                             onTap: () {
                               showModalBottomSheet(
                                 context: context,
-                                backgroundColor: Colors.black,
+                                backgroundColor: Color(0xFF0A131F),
                                 showDragHandle: true,
                                 shape: const RoundedRectangleBorder(
                                   borderRadius: BorderRadius.vertical(
@@ -297,13 +297,13 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
                             onTap: () {
                               showModalBottomSheet(
                                 context: context,
-                                backgroundColor: Colors.black,
+                                backgroundColor: const Color(0xFF0A131F),
                                 showDragHandle: true,
                                 isScrollControlled: false,
                                 scrollControlDisabledMaxHeightRatio: 0.8,
                                 shape: const RoundedRectangleBorder(
                                   borderRadius: BorderRadius.vertical(
-                                      top: Radius.circular(20)),
+                                      top: Radius.circular(45)),
                                 ),
                                 builder: (context) =>
                                     _buildRouteDetailsSheet(context, route),
@@ -808,7 +808,7 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
 Widget _buildRouteDetailsSheet(
     BuildContext context, Map<String, dynamic> route) {
   return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.only(right: 0),
       child: route['transfers'] == 0
           ? Column(
               mainAxisSize: MainAxisSize.max,
@@ -839,13 +839,18 @@ Widget _buildRouteDetailsSheet(
                         ),
                       ],
                     )),
+                    SizedBox(
+                      width: 80,
+                      child:
                     Text(
                       "${route['departure_time']}",
+                      textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
+                    ),
                     ),
                   ],
                 ),
@@ -888,39 +893,37 @@ Widget _buildRouteDetailsSheet(
                               ),
                             ],
                           ),
-                          const SizedBox(height: 30),
-                          Text(
-                            (() {
-                              final arrivalTime = DateFormat("HH:mm")
-                                  .parse(route['arrival_time']);
-                              final departureTime = DateFormat("HH:mm")
-                                  .parse(route['departure_time']);
-                              final duration =
-                                  arrivalTime.difference(departureTime);
-
-                              return "${duration.inHours}h ${duration.inMinutes.remainder(60)}m";
-                            })(),
-                          ),
+                          
                         ],
                       )),
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
+                          SizedBox(
+                      width: 80,
+                      child:
                           Text(
                             "${route['price']}",
+                            textAlign: TextAlign.center,
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                          const Text(
+                          ),
+                          const SizedBox(
+                      width: 80,
+                      child:
+                          Text(
                             "Ron",
+                            textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Colors.white70,
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
                             ),
+                          ),
                           ),
                         ],
                       ),
@@ -953,17 +956,83 @@ Widget _buildRouteDetailsSheet(
                         ),
                       ],
                     )),
+                    SizedBox(
+                      width: 80,
+                      child:
                     Text(
                       "${route['arrival_time']}",
+                      textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 160),
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        // Navigate back to the previous screen
+                        Navigator.of(context).pop();
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(left: 10),
+                        height: 60,
+                        width: 60,
+                        decoration: const BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(25)),
+                          color: Colors.black,
+                        ),
+                        child: const Center(
+                          child: Icon(
+                            FontAwesomeIcons.xmark,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 10),
+                        height: 60,
+                        decoration: const BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(25)),
+                          color: Colors.black,
+                        ),
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 20),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Flexible(
+                                // Ensures proper text overflow handling
+                                child: Text(
+                                  'Cumpara',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    overflow: TextOverflow
+                                        .fade, // Enables fade effect
+                                  ),
+                                  softWrap:
+                                      false, // Prevents text from wrapping
+                                  overflow: TextOverflow.fade,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                 const SizedBox(height: 25),
               ],
             )
           : Column(
@@ -995,13 +1064,18 @@ Widget _buildRouteDetailsSheet(
                         ),
                       ],
                     )),
+                    SizedBox(
+                      width: 80,
+                      child:
                     Text(
                       "${route['first_leg']['departure_time']}",
+                      textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
+                    ),
                     ),
                   ],
                 ),
@@ -1046,27 +1120,41 @@ Widget _buildRouteDetailsSheet(
                           ),
                         ],
                       )),
+                      
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
+                          SizedBox(
+                      width: 80,
+                      child:
                           Text(
                             "${route['first_leg']['price']}",
+                            textAlign: TextAlign.center,
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                          const Text(
+                          ),
+                          const SizedBox(
+                      width: 80,
+                      child:
+                          Text(
                             "Ron",
+                            textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Colors.white70,
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
+                          ),
                         ],
                       ),
+                      
+                  
                     ],
                   ),
                 ),
@@ -1120,36 +1208,57 @@ Widget _buildRouteDetailsSheet(
                       ],
                     )),
                     route['transfer_type'] == 'walk'
-                        ? Text(
+
+                        ? 
+                        SizedBox(
+                      width: 80,
+                      child:
+                        Text(
                             "${route['first_leg']['arrival_time']}",
+                            textAlign: TextAlign.center,
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),
                           )
-                        : Column(
+                        )
+                        : 
+                       
+                      
+                        Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
+                              SizedBox(
+                      width: 80,
+                      child:
                               Text(
                                 "${route['first_leg']['arrival_time']}",
+                                textAlign: TextAlign.center,
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
+                              ),
+                              SizedBox(
+                      width: 80,
+                      child:
                               Text(
                                 "${route['second_leg']['departure_time']}",
+                                textAlign: TextAlign.center,
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                 ),
                               )
+                              ),
                             ],
                           )
+                      
                   ],
                 ),
                 if (route['transfer_type'] == 'walk')
@@ -1177,8 +1286,10 @@ Widget _buildRouteDetailsSheet(
                                     FontAwesomeIcons.personWalkingLuggage,
                                     color: Colors.white),
                                 const SizedBox(width: 10),
+                                
                                 Text(
                                   "${(route['walk_distance'] * 1000).toInt()}m",
+                                  textAlign: TextAlign.center,
                                   style: const TextStyle(
                                     color: Colors.white70,
                                     fontSize: 14,
@@ -1189,6 +1300,9 @@ Widget _buildRouteDetailsSheet(
                             ),
                           ],
                         )),
+                        SizedBox(
+                      width: 80,
+                      child:
                         Text(
                           (() {
                             final arrivalTime = DateFormat("HH:mm")
@@ -1200,11 +1314,13 @@ Widget _buildRouteDetailsSheet(
 
                             return "${duration.inHours}h ${duration.inMinutes.remainder(60)}m";
                           })(),
+                          textAlign: TextAlign.center,
                           style: const TextStyle(
                             color: Colors.white70,
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
+                        ),
                         ),
                       ],
                     ),
@@ -1236,13 +1352,18 @@ Widget _buildRouteDetailsSheet(
                           ),
                         ],
                       )),
+                      SizedBox(
+                      width: 80,
+                      child:
                       Text(
                         "${route['second_leg']['departure_time']}",
+                        textAlign: TextAlign.center,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
+                      ),
                       ),
                     ],
                   ),
@@ -1288,27 +1409,40 @@ Widget _buildRouteDetailsSheet(
                           ),
                         ],
                       )),
+                      
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
+                          SizedBox(
+                      width: 80,
+                      child:
                           Text(
                             "${route['second_leg']['price']}",
+                            textAlign: TextAlign.center,
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                          const Text(
+                          ),
+                          const SizedBox(
+                      width: 80,
+                      child:
+                           Text(
                             "Ron",
+                            textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Colors.white70,
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
+                              
                             ),
+                          ),
                           ),
                         ],
                       ),
+                      
                     ],
                   ),
                 ),
@@ -1338,17 +1472,83 @@ Widget _buildRouteDetailsSheet(
                         ),
                       ],
                     )),
+                    SizedBox(
+                      width: 80,
+                      child:
                     Text(
                       "${route['second_leg']['arrival_time']}",
+                      textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 180),
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        // Navigate back to the previous screen
+                        Navigator.of(context).pop();
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(left: 10),
+                        height: 60,
+                        width: 60,
+                        decoration: const BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(25)),
+                          color: Colors.black,
+                        ),
+                        child: const Center(
+                          child: Icon(
+                            FontAwesomeIcons.xmark,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 10),
+                        height: 60,
+                        decoration: const BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(25)),
+                          color: Colors.black,
+                        ),
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 20),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Flexible(
+                                // Ensures proper text overflow handling
+                                child: Text(
+                                  'Cumpara',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    overflow: TextOverflow
+                                        .fade, // Enables fade effect
+                                  ),
+                                  softWrap:
+                                      false, // Prevents text from wrapping
+                                  overflow: TextOverflow.fade,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 25),
               ],
             ));
 }
