@@ -84,9 +84,12 @@ class AuthStorage {
   }
 }
 
+
+
 class _HomeScreenState extends State<HomeScreen> {
   late MapboxMap mapboxMap;
   final Location location = Location();
+  final _storage = const FlutterSecureStorage();
 
   // ignore: unused_field
   LocationData? _currentLocation;
@@ -118,6 +121,46 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _fetchAppInfo();
+  }
+
+  Future<void> _signOut(BuildContext context) async {
+    try {
+      // Retrieve tokens from secure storage
+      final accessToken = await _storage.read(key: 'access-token');
+      final uid = await _storage.read(key: 'uid');
+      final client = await _storage.read(key: 'client');
+      final authorization = await _storage.read(key: 'authorization');
+
+      if (accessToken == null || uid == null || client == null) {
+        _showSnackBar(context, 'Missing authentication tokens.');
+        return;
+      }
+
+      // Make the sign-out API call
+      final response = await http.delete(
+        Uri.parse('https://api.thebus.info/auth/sign_out'),
+        headers: {
+          'Authorization': 'Bearer $authorization',
+          'access-token': accessToken,
+          'client': client,
+          'uid': uid,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // Navigate to login or welcome page on successful sign-out
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      } else {
+        _showSnackBar(context, 'Failed to sign out. Please try again.');
+      }
+    } catch (e) {
+      _showSnackBar(context, 'An error occurred: $e');
+    }
+  }
+  void _showSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   Future<void> _onMapCreated(MapboxMap mapboxMap) async {
@@ -158,6 +201,8 @@ class _HomeScreenState extends State<HomeScreen> {
       _showError('Error fetching stops: $e');
     }
   }
+
+  
 
   Future<void> _getClosestStopsFromAPI(LocationData currentLocation) async {
     if (currentLocation.latitude == null || currentLocation.longitude == null) {
@@ -411,7 +456,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       top: Radius.circular(45)),
                                 ),
                   builder: (context) => _buildSettingsBottomSheet(
-                      context, appVersion, appBuildNumber),
+                      context, appVersion, appBuildNumber,  _signOut), // Pass the function here),
                 );
               },
               child: Container(
@@ -1052,7 +1097,7 @@ Widget _buildSearchCard(dynamic item, String type, BuildContext context,
 }
 
 Widget _buildSettingsBottomSheet(
-    BuildContext context, String appVersion, String appBuildNumber) {
+    BuildContext context, String appVersion, String appBuildNumber,Future<void> Function(BuildContext) onSignOut,) {
   
       return Container(
         decoration: const BoxDecoration(
@@ -1067,6 +1112,155 @@ Widget _buildSettingsBottomSheet(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+
+
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  height: 170,
+                  width: 170,
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Padding(padding: const EdgeInsets.all(10),
+                  child:  ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child:
+                  const Image(image: AssetImage('assets/lightView.png',
+                  ),
+                  )
+                  ),
+                  ),
+                ),
+                const SizedBox(width: 5),
+                Container(
+                  height: 170,
+                  width: 170,
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    border: Border.all(
+                      color: Colors.white70,
+                      width: 2,
+                    ),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Padding(padding: const EdgeInsets.all(10),
+                  child:  ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child:
+                  const Image(image: AssetImage('assets/darkView.png',
+                  ),
+                  )
+                  ),
+                  ),
+                ),
+
+              ],
+            ),
+            const SizedBox(height: 30),
+            GestureDetector(
+              onTap: () {
+                
+              },
+              child: Container(
+               height: 60,
+               width: MediaQuery.of(context).size.width - 40,
+               decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    FontAwesomeIcons.signOutAlt,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  SizedBox(width: 10),
+                  Text(
+                    'IDK',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ),
+            const SizedBox(height: 10),
+            GestureDetector(
+              onTap: () {
+                
+              },
+              child: Container(
+               height: 60,
+               width: MediaQuery.of(context).size.width - 40,
+               decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    FontAwesomeIcons.signOutAlt,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  SizedBox(width: 10),
+                  Text(
+                    'IDK2',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ),
+            const SizedBox(height: 10),
+            GestureDetector(
+              onTap: () async {
+            await onSignOut(context); // Call the passed sign-out function
+          },
+              child: Container(
+               height: 60,
+               width: MediaQuery.of(context).size.width - 40,
+               decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    FontAwesomeIcons.signOutAlt,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  SizedBox(width: 10),
+                  Text(
+                    'Sign Out',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ),
+            
             Expanded(child: Text('expanded')),
             // Drag handle
             
