@@ -55,16 +55,16 @@ class _TicketsPageState extends State<TicketsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white24,
+      backgroundColor: Color(0xFF0A131F),
       body: 
       Stack(
         children: [
-          Positioned.fill(
-          child: Image.asset(
-            'assets/bg_gradient.png', // Replace with your image path
-            fit: BoxFit.cover, // Ensures the image covers the screen
-          ),
-        ),
+        //   Positioned.fill(
+        //   child: Image.asset(
+        //     'assets/bg_gradient.png', // Replace with your image path
+        //     fit: BoxFit.cover, // Ensures the image covers the screen
+        //   ),
+        // ),
           Positioned(
             top: 80,
             left: 10,
@@ -212,8 +212,8 @@ class TicketCard extends StatelessWidget {
                       ),
                     ),
                   
-                  Text('Pret: ${ticket['price']} RON',
-                  style: const TextStyle(color: Colors.white54)),
+                  Text('${ticket['price']} RON',
+                  style: const TextStyle(color: Colors.white70)),
                   
                 ],
               )),
@@ -231,7 +231,7 @@ class TicketCard extends StatelessWidget {
                     Expanded(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Column(
                             mainAxisAlignment: MainAxisAlignment.start,
@@ -253,7 +253,7 @@ class TicketCard extends StatelessWidget {
                           
                           const Icon(
                             FontAwesomeIcons.play,
-                            size: 16,
+                            size: 18,
                             color: Colors.white,
                           ),
                           Column(
@@ -305,7 +305,7 @@ class TicketCard extends StatelessWidget {
           ),
           if (isLatest)
             const Divider(
-              color: Colors.white10,
+              color: Colors.white54,
               thickness: 1,
             ),
           if (isLatest) const SizedBox(height: 10),

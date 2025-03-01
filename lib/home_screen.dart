@@ -84,8 +84,6 @@ class AuthStorage {
   }
 }
 
-
-
 class _HomeScreenState extends State<HomeScreen> {
   late MapboxMap mapboxMap;
   final Location location = Location();
@@ -157,6 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _showSnackBar(context, 'An error occurred: $e');
     }
   }
+
   void _showSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
@@ -201,8 +200,6 @@ class _HomeScreenState extends State<HomeScreen> {
       _showError('Error fetching stops: $e');
     }
   }
-
-  
 
   Future<void> _getClosestStopsFromAPI(LocationData currentLocation) async {
     if (currentLocation.latitude == null || currentLocation.longitude == null) {
@@ -451,12 +448,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   backgroundColor: Color(0xFF0A131F),
                   isDismissible: true,
                   scrollControlDisabledMaxHeightRatio: 0.8,
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.vertical(
-                                      top: Radius.circular(45)),
-                                ),
+                  shape: const RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(45)),
+                  ),
                   builder: (context) => _buildSettingsBottomSheet(
-                      context, appVersion, appBuildNumber,  _signOut), // Pass the function here),
+                      context,
+                      appVersion,
+                      appBuildNumber,
+                      _signOut), // Pass the function here),
                 );
               },
               child: Container(
@@ -1097,197 +1097,182 @@ Widget _buildSearchCard(dynamic item, String type, BuildContext context,
 }
 
 Widget _buildSettingsBottomSheet(
-    BuildContext context, String appVersion, String appBuildNumber,Future<void> Function(BuildContext) onSignOut,) {
-  
-      return Container(
-        decoration: const BoxDecoration(
-          color: Color(0xFF0A131F),
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(25),
-            topRight: Radius.circular(25),
-          ),
-          
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
+  BuildContext context,
+  String appVersion,
+  String appBuildNumber,
+  Future<void> Function(BuildContext) onSignOut,
+) {
+  return Container(
+    decoration: const BoxDecoration(
+      color: Color(0xFF0A131F),
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(25),
+        topRight: Radius.circular(25),
+      ),
+    ),
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-
-
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
-                  height: 170,
-                  width: 170,
-                  decoration: BoxDecoration(
-                    color: Colors.transparent,
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: Padding(padding: const EdgeInsets.all(10),
-                  child:  ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child:
-                  const Image(image: AssetImage('assets/lightView.png',
-                  ),
-                  )
-                  ),
-                  ),
-                ),
-                const SizedBox(width: 5),
-                Container(
-                  height: 170,
-                  width: 170,
-                  decoration: BoxDecoration(
-                    color: Colors.transparent,
-                    border: Border.all(
-                      color: Colors.white70,
-                      width: 2,
-                    ),
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: Padding(padding: const EdgeInsets.all(10),
-                  child:  ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child:
-                  const Image(image: AssetImage('assets/darkView.png',
-                  ),
-                  )
-                  ),
-                  ),
-                ),
-
-              ],
-            ),
-            const SizedBox(height: 30),
-            GestureDetector(
-              onTap: () {
-                
-              },
-              child: Container(
-               height: 60,
-               width: MediaQuery.of(context).size.width - 40,
-               decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    FontAwesomeIcons.signOutAlt,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                  SizedBox(width: 10),
-                  Text(
-                    'IDK',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+            Container(
+              height: 160,
+              width: 160,
+              decoration: BoxDecoration(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.circular(30),
               ),
-            ),
-            ),
-            const SizedBox(height: 10),
-            GestureDetector(
-              onTap: () {
-                
-              },
-              child: Container(
-               height: 60,
-               width: MediaQuery.of(context).size.width - 40,
-               decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    FontAwesomeIcons.signOutAlt,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                  SizedBox(width: 10),
-                  Text(
-                    'IDK2',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            ),
-            const SizedBox(height: 10),
-            GestureDetector(
-              onTap: () async {
-            await onSignOut(context); // Call the passed sign-out function
-          },
-              child: Container(
-               height: 60,
-               width: MediaQuery.of(context).size.width - 40,
-               decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    FontAwesomeIcons.signOutAlt,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                  SizedBox(width: 10),
-                  Text(
-                    'Sign Out',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            ),
-            
-            Expanded(child: Text('expanded')),
-            // Drag handle
-            
-            // Settings title
-            
-            // Version info
-            Center(
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    Text(
-                      "Version $appVersion (Build $appBuildNumber)",
-                      style: const TextStyle(fontSize: 14, color: Colors.grey),
-                    ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      "© 2025 Prosoft.plus",
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
-                    ),
-                  ],
-                ),
+                padding: const EdgeInsets.all(10),
+                child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: const Image(
+                      image: AssetImage(
+                        'assets/lightView.png',
+                      ),
+                    )),
               ),
             ),
-            const SizedBox(height: 20,)
+            const SizedBox(width: 5),
+            Container(
+              height: 160,
+              width: 160,
+              decoration: BoxDecoration(
+                color: Colors.transparent,
+                border: Border.all(
+                  color: Colors.white70,
+                  width: 2,
+                ),
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: const Image(
+                      image: AssetImage(
+                        'assets/darkView.png',
+                      ),
+                    )),
+              ),
+            ),
           ],
         ),
-      );
-    }
- 
+        const SizedBox(height: 30),
+        GestureDetector(
+          onTap: () {},
+          child: Container(
+            height: 60,
+            width: MediaQuery.of(context).size.width - 40,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(25),
+            ),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  FontAwesomeIcons.gears,
+                  color: Colors.white,
+                  size: 18,
+                ),
+                SizedBox(width: 15),
+                Text(
+                  'Acount Settings',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        
+        const SizedBox(height: 10),
+        GestureDetector(
+          onTap: () async {
+            await onSignOut(context); // Call the passed sign-out function
+          },
+          child: Container(
+            height: 60,
+            width: MediaQuery.of(context).size.width - 40,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(25),
+            ),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  FontAwesomeIcons.arrowRightFromBracket,
+                  color: Color(0xFFc51b29),
+                  size: 18,
+                ),
+                SizedBox(width: 15),
+                Text(
+                  'Sign Out',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        Expanded(child: Text('expanded')),
+        // Drag handle
+
+        // Settings title
+        SizedBox(
+          width: MediaQuery.of(context).size.width - 80,
+          child: const Image(
+            image: AssetImage(
+              'assets/logo_trsp.png',
+            ),
+          ),
+        ),
+
+        // Version info
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                Text(
+                  "Version $appVersion (Build $appBuildNumber) © 2025 prosoft.plus",
+                  style: const TextStyle(fontSize: 14, color: Colors.white70),
+                ),
+                const SizedBox(height: 5,),
+                const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "About Us |",
+                      style: TextStyle(fontSize: 14, color: Colors.white54),
+                    ),
+                    Text(
+                      " Privacy Statement",
+                      style: TextStyle(fontSize: 14, color: Colors.white54),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(
+          height: 20,
+        )
+      ],
+    ),
+  );
+}

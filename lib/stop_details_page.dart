@@ -286,15 +286,9 @@ Widget _buildServiceCard(String serviceName, String eta, int serviceId,
                   borderRadius: BorderRadius.circular(25),
                 ),
               ),
-              onPressed: () {
-                // Handle button press for the main card (if needed)
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ServiceDetails(
-                        serviceId: serviceId, stopId: selectedStopId),
-                  ),
-                );
+             onPressed: () {
+                // Instead of navigating, show bottom sheet with service details
+                _showServiceDetailsBottomSheet(context, serviceId, selectedStopId);
               },
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -368,4 +362,339 @@ Widget _buildServiceCard(String serviceName, String eta, int serviceId,
   );
 }
 
+// Add this new function to show a bottom sheet with service details
+void _showServiceDetailsBottomSheet(BuildContext context, int serviceId, int selectedStopId) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (context) {
+      return DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        minChildSize: 0.3,
+        maxChildSize: 0.9,
+        builder: (_, scrollController) {
+          return Container(
+            decoration: const BoxDecoration(
+              color: Color(0xFF0A131F),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(25),
+                topRight: Radius.circular(25),
+              ),
+            ),
+            child: ServiceDetailsBottomSheet(
+              serviceId: serviceId, 
+              scrollController: scrollController,
+            ),
+          );
+        },
+      );
+    },
+  );
+}
 
+// Create a StatefulWidget for the bottom sheet content
+class ServiceDetailsBottomSheet extends StatefulWidget {
+  final int serviceId;
+  final ScrollController scrollController;
+
+  const ServiceDetailsBottomSheet({
+    Key? key,
+    required this.serviceId,
+    required this.scrollController,
+  }) : super(key: key);
+
+  @override
+  State<ServiceDetailsBottomSheet> createState() => _ServiceDetailsBottomSheetState();
+}
+
+class _ServiceDetailsBottomSheetState extends State<ServiceDetailsBottomSheet> {
+  bool isLoading = true;
+  String serviceName = '';
+  String serviceDescription = '';
+  String routeId = '';
+  String idColor = '';
+  String startTime = '';
+  Map<String, dynamic> busInfo = {};
+  Map<String, dynamic> driverInfo = {};
+  List<dynamic> stops = [];
+  dynamic polyLine;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchServiceDetails();
+  }
+
+  Future<void> fetchServiceDetails() async {
+    try {
+      final response = await http.get(Uri.parse(
+        'https://api.thebus.info/v1/services/detailed?service_id=${widget.serviceId}'));
+      
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          serviceName = data['service']['name'] ?? '';
+          serviceDescription = data['service']['description'] ?? '';
+          routeId = data['service']['route_id']?.toString() ?? '';
+          idColor = data['service']['id_color'] ?? '0000FF';
+          startTime = data['service']['start_time'] ?? '';
+          busInfo = data['service']['bus'] ?? {};
+          driverInfo = data['service']['driver'] ?? {};
+          stops = data['stops'] ?? [];
+          polyLine = data['service']['geojson'];
+          isLoading = false;
+        });
+        print('Service Details: $data'); // Log response for debugging
+      } else {
+        throw Exception(
+          'Failed to load service details. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      print('Error fetching service details: $e'); // Log error for debugging
+    }
+  }
+
+  // Format datetime string to a more readable format
+  String formatDateTime(String dateTimeString) {
+    try {
+      final dateTime = DateTime.parse(dateTimeString);
+      return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+    } catch (e) {
+      return dateTimeString;
+    }
+  }
+
+  // Get color from hex string
+  Color getColorFromHex(String hexColor) {
+    try {
+      hexColor = hexColor.toUpperCase().replaceAll("#", "");
+      if (hexColor.length == 6) {
+        return Color(int.parse("0xFF$hexColor"));
+      }
+      return Colors.blue;
+    } catch (e) {
+      return Colors.blue;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return isLoading
+        ? const Center(child: CircularProgressIndicator())
+        : ListView(
+            controller: widget.scrollController,
+            padding: const EdgeInsets.all(20),
+            children: [
+              // Handle to drag the sheet
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 5,
+                  margin: const EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              
+              // Service header
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: getColorFromHex(idColor),
+                    ),
+                    child: Text(
+                      'C$routeId',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      serviceName,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              
+              const SizedBox(height: 10),
+              Text(
+                serviceDescription,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[700],
+                ),
+              ),
+              
+              const SizedBox(height: 20),
+              
+              // Bus info
+              if (busInfo.isNotEmpty) ...[
+                Row(
+                  children: [
+                    const Icon(FontAwesomeIcons.bus, color: Colors.blue),
+                    const SizedBox(width: 10),
+                    Text(
+                      '${busInfo['brand']} - ${busInfo['plate']}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      '${busInfo['seat_count']} seats',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+              ],
+              
+              // Driver info (if available)
+              if (driverInfo.isNotEmpty && driverInfo['email'] != null) ...[
+                Row(
+                  children: [
+                    const Icon(FontAwesomeIcons.userTie, color: Colors.blue),
+                    const SizedBox(width: 10),
+                    Text(
+                      driverInfo['name'] ?? 'Driver',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      driverInfo['email'] ?? '',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+              ],
+              
+              // Departure time
+              Row(
+                children: [
+                  const Icon(FontAwesomeIcons.clockRotateLeft, color: Colors.orange, size: 16),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Departure: ${formatDateTime(startTime)}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+              
+              const SizedBox(height: 20),
+              
+              // Stops list header
+              const Row(
+                children: [
+                  Icon(FontAwesomeIcons.locationDot, color: Colors.red),
+                  SizedBox(width: 10),
+                  Text(
+                    'Stops',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              
+              const SizedBox(height: 10),
+              
+              // Stops list
+              ...stops.map((stop) => _buildStopItem(stop)).toList(),
+            ],
+          );
+  }
+  
+  Widget _buildStopItem(dynamic stop) {
+    final stopName = stop['stop_name'] ?? 'Unknown Stop';
+    final stopCity = stop['stops_city'] ?? '';
+    final stopId = stop['stop_id'] ?? 0;
+    final timeAtStop = formatDateTime(stop['time_at_stop'] ?? '');
+    
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        children: [
+          const Icon(
+            FontAwesomeIcons.busSimple,
+            color: Colors.blue,
+            size: 16,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  stopName,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                if (stopCity.isNotEmpty)
+                  Text(
+                    stopCity,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                timeAtStop,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              Text(
+                '#$stopId',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
