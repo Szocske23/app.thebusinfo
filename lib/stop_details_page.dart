@@ -29,7 +29,6 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
   String stopName = "";
   List services = [];
 
-
   Map<String, List<Map<String, dynamic>>> _groupServicesByRoute(
       List<dynamic> services) {
     final groupedServices = <String, List<Map<String, dynamic>>>{};
@@ -60,7 +59,6 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
           selectedStopId = data['stop_id'];
           routes = data['routes']; // Store the routes data
           services = data['services']; // Store the services data
-         
 
           isLoading = false;
         });
@@ -170,6 +168,7 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
                                       service['service_id'],
                                       selectedStopId,
                                       service['route_name'],
+                                      service['service_color'] ?? '0000FF',
                                       context,
                                     ),
                                   );
@@ -249,6 +248,18 @@ class _StopDetailsPageState extends State<StopDetailsPage> {
   }
 }
 
+Color getColorFromHex(String hexColor) {
+    try {
+      hexColor = hexColor.toUpperCase().replaceAll("#", "");
+      if (hexColor.length == 6) {
+        return Color(int.parse("0xFF$hexColor"));
+      }
+      return Colors.blue;
+    } catch (e) {
+      return Colors.blue;
+    }
+  }
+
 String _formatTimeAtStop(String? timeAtStop) {
   if (timeAtStop == null) return "N/A";
   try {
@@ -264,7 +275,7 @@ String _formatTimeAtStop(String? timeAtStop) {
 }
 
 Widget _buildServiceCard(String serviceName, String eta, int serviceId,
-    int selectedStopId, String serviceRoute, BuildContext context) {
+    int selectedStopId, String serviceRoute,String colorId, BuildContext context) {
   return Padding(
     padding: const EdgeInsets.symmetric(horizontal: 0),
     child: Row(
@@ -286,9 +297,10 @@ Widget _buildServiceCard(String serviceName, String eta, int serviceId,
                   borderRadius: BorderRadius.circular(25),
                 ),
               ),
-             onPressed: () {
+              onPressed: () {
                 // Instead of navigating, show bottom sheet with service details
-                _showServiceDetailsBottomSheet(context, serviceId, selectedStopId);
+                _showServiceDetailsBottomSheet(
+                    context, serviceId, selectedStopId);
               },
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -306,7 +318,7 @@ Widget _buildServiceCard(String serviceName, String eta, int serviceId,
                                 vertical: 2, horizontal: 5),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(8),
-                              color: Colors.blue,
+                              color: getColorFromHex(colorId),
                             ),
                             child: Text(
                               serviceRoute,
@@ -314,13 +326,13 @@ Widget _buildServiceCard(String serviceName, String eta, int serviceId,
                                   fontSize: 16, color: Colors.white),
                             ),
                           ),
-                          const SizedBox(width: 5),
+                          const SizedBox(width: 2),
                           const Icon(
-                            FontAwesomeIcons.play,
-                            size: 16,
+                            FontAwesomeIcons.caretRight,
+                            size: 18,
                             color: Colors.white,
                           ),
-                          const SizedBox(width: 5),
+                          const SizedBox(width: 2),
                           Text(
                             serviceName,
                             style: const TextStyle(
@@ -363,32 +375,19 @@ Widget _buildServiceCard(String serviceName, String eta, int serviceId,
 }
 
 // Add this new function to show a bottom sheet with service details
-void _showServiceDetailsBottomSheet(BuildContext context, int serviceId, int selectedStopId) {
+void _showServiceDetailsBottomSheet(
+    BuildContext context, int serviceId, int selectedStopId) {
   showModalBottomSheet(
     context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
+    enableDrag: true,
+    scrollControlDisabledMaxHeightRatio: 0.85,
+    backgroundColor: const Color(0xFF0A131F),
+    showDragHandle: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(45)),
+    ),
     builder: (context) {
-      return DraggableScrollableSheet(
-        initialChildSize: 0.6,
-        minChildSize: 0.3,
-        maxChildSize: 0.9,
-        builder: (_, scrollController) {
-          return Container(
-            decoration: const BoxDecoration(
-              color: Color(0xFF0A131F),
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(25),
-                topRight: Radius.circular(25),
-              ),
-            ),
-            child: ServiceDetailsBottomSheet(
-              serviceId: serviceId, 
-              scrollController: scrollController,
-            ),
-          );
-        },
-      );
+      return ServiceDetailsBottomSheet(serviceId: serviceId);
     },
   );
 }
@@ -396,16 +395,13 @@ void _showServiceDetailsBottomSheet(BuildContext context, int serviceId, int sel
 // Create a StatefulWidget for the bottom sheet content
 class ServiceDetailsBottomSheet extends StatefulWidget {
   final int serviceId;
-  final ScrollController scrollController;
 
-  const ServiceDetailsBottomSheet({
-    Key? key,
-    required this.serviceId,
-    required this.scrollController,
-  }) : super(key: key);
+  const ServiceDetailsBottomSheet({Key? key, required this.serviceId})
+      : super(key: key);
 
   @override
-  State<ServiceDetailsBottomSheet> createState() => _ServiceDetailsBottomSheetState();
+  State<ServiceDetailsBottomSheet> createState() =>
+      _ServiceDetailsBottomSheetState();
 }
 
 class _ServiceDetailsBottomSheetState extends State<ServiceDetailsBottomSheet> {
@@ -413,6 +409,7 @@ class _ServiceDetailsBottomSheetState extends State<ServiceDetailsBottomSheet> {
   String serviceName = '';
   String serviceDescription = '';
   String routeId = '';
+  String routeName = '';
   String idColor = '';
   String startTime = '';
   Map<String, dynamic> busInfo = {};
@@ -429,14 +426,15 @@ class _ServiceDetailsBottomSheetState extends State<ServiceDetailsBottomSheet> {
   Future<void> fetchServiceDetails() async {
     try {
       final response = await http.get(Uri.parse(
-        'https://api.thebus.info/v1/services/detailed?service_id=${widget.serviceId}'));
-      
+          'https://api.thebus.info/v1/services/detailed?service_id=${widget.serviceId}'));
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
           serviceName = data['service']['name'] ?? '';
           serviceDescription = data['service']['description'] ?? '';
           routeId = data['service']['route_id']?.toString() ?? '';
+          routeName = data['service']['route_name'] ?? '';
           idColor = data['service']['id_color'] ?? '0000FF';
           startTime = data['service']['start_time'] ?? '';
           busInfo = data['service']['bus'] ?? {};
@@ -448,7 +446,7 @@ class _ServiceDetailsBottomSheetState extends State<ServiceDetailsBottomSheet> {
         print('Service Details: $data'); // Log response for debugging
       } else {
         throw Exception(
-          'Failed to load service details. Status code: ${response.statusCode}');
+            'Failed to load service details. Status code: ${response.statusCode}');
       }
     } catch (e) {
       setState(() {
@@ -486,189 +484,207 @@ class _ServiceDetailsBottomSheetState extends State<ServiceDetailsBottomSheet> {
     return isLoading
         ? const Center(child: CircularProgressIndicator())
         : ListView(
-            controller: widget.scrollController,
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.only(left: 20, right: 20),
             children: [
-              // Handle to drag the sheet
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 5,
-                  margin: const EdgeInsets.only(bottom: 20),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-              
               // Service header
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 2, horizontal: 5),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
                       color: getColorFromHex(idColor),
                     ),
                     child: Text(
-                      'C$routeId',
+                      routeName,
                       style: const TextStyle(
                         color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w500,
                         fontSize: 16,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 2),
+                  const Icon(
+                    FontAwesomeIcons.caretRight,
+                    size: 18,
+                    color: Colors.white,
+                  ),
+                  const SizedBox(width: 2),
                   Expanded(
                     child: Text(
                       serviceName,
                       style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white),
+                    ),
+                  ),
+                  Row(
+                children: [
+                  const Icon(FontAwesomeIcons.planeDeparture,
+                      color: Colors.orange, size: 16),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Dep: ${formatDateTime(startTime)}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white
                     ),
                   ),
                 ],
+                  ),
+                ],
               ),
-              
-              const SizedBox(height: 10),
-              Text(
-                serviceDescription,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[700],
-                ),
-              ),
-              
-              const SizedBox(height: 20),
-              
               // Bus info
               if (busInfo.isNotEmpty) ...[
+                const SizedBox(height: 15),
                 Row(
                   children: [
-                    const Icon(FontAwesomeIcons.bus, color: Colors.blue),
+                    const Icon(FontAwesomeIcons.busSimple, size: 14, color: Colors.blue),
                     const SizedBox(width: 10),
                     Text(
                       '${busInfo['brand']} - ${busInfo['plate']}',
                       style: const TextStyle(
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: FontWeight.w500,
+                        color: Colors.white70
                       ),
                     ),
                     const Spacer(),
+                    const Icon(FontAwesomeIcons.person,size: 14, color: Colors.white70),
+                    const SizedBox(width: 5,),
                     Text(
-                      '${busInfo['seat_count']} seats',
+                      '${busInfo['seat_count']}',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.white70,
+                      ),
+                    ),
+                    const SizedBox(width: 10,),
+                    const Icon(FontAwesomeIcons.wheelchair,size: 14, color: Colors.white70),
+                    const SizedBox(width: 5,),
+                    const Text(
+                      '2',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey[600],
+                        color: Colors.white70
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 10),
               ],
+
               
-              // Driver info (if available)
-              if (driverInfo.isNotEmpty && driverInfo['email'] != null) ...[
-                Row(
-                  children: [
-                    const Icon(FontAwesomeIcons.userTie, color: Colors.blue),
-                    const SizedBox(width: 10),
-                    Text(
-                      driverInfo['name'] ?? 'Driver',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
+
+             const SizedBox(height: 25),
+
+             // Stops list with connecting line
+            ListView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemCount: stops.length,
+              itemBuilder: (context, index) {
+                final isFirstItem = index == 0;
+                final isLastItem = index == stops.length - 1;
+                
+                return IntrinsicHeight(
+                  
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Timeline line and dot
+                      SizedBox(
+                        width: 30,
+                        child: Column(
+                          children: [
+                            
+                            // Top connector line (hide for first item)
+                            if (!isFirstItem)
+                              Container(
+                                width: 2,
+                                height: 0,
+                                color: getColorFromHex(idColor),
+                              ),
+                              
+                            // Dot
+
+                            Container(
+                              width: 16,
+                              height: 16,
+                              decoration: BoxDecoration(
+                                color: getColorFromHex(idColor),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white38,
+                                  width: 2,
+                                ),
+                              ),
+                            ),
+                            
+                            // Bottom connector line (hide for last item)
+                            if (!isLastItem)
+                              Expanded(
+                                child: Container(
+                                  width: 2,
+                                  height: 25,
+                                  color: getColorFromHex(idColor),
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const Spacer(),
-                    Text(
-                      driverInfo['email'] ?? '',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
+                      
+                      // Stop information
+                      Expanded(
+                        child: _buildStopItem(stops[index]),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-              ],
-              
-              // Departure time
-              Row(
-                children: [
-                  const Icon(FontAwesomeIcons.clockRotateLeft, color: Colors.orange, size: 16),
-                  const SizedBox(width: 10),
-                  Text(
-                    'Departure: ${formatDateTime(startTime)}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    ],
                   ),
-                ],
-              ),
-              
-              const SizedBox(height: 20),
-              
-              // Stops list header
-              const Row(
-                children: [
-                  Icon(FontAwesomeIcons.locationDot, color: Colors.red),
-                  SizedBox(width: 10),
-                  Text(
-                    'Stops',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              
-              const SizedBox(height: 10),
-              
-              // Stops list
-              ...stops.map((stop) => _buildStopItem(stop)).toList(),
-            ],
-          );
-  }
-  
+                );
+              },
+            ),
+          ],
+        );
+}
+
+
   Widget _buildStopItem(dynamic stop) {
     final stopName = stop['stop_name'] ?? 'Unknown Stop';
     final stopCity = stop['stops_city'] ?? '';
-    final stopId = stop['stop_id'] ?? 0;
     final timeAtStop = formatDateTime(stop['time_at_stop'] ?? '');
-    
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.only(bottom: 15.0, top: 0),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
-            FontAwesomeIcons.busSimple,
-            color: Colors.blue,
-            size: 16,
-          ),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Text(
                   stopName,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
+                    color: Colors.white
                   ),
                 ),
                 if (stopCity.isNotEmpty)
                   Text(
                     stopCity,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
+                    style: const TextStyle(
+                      fontSize: 12,
+
+                      fontWeight: FontWeight.w400,
+                      color: Colors.white60,
                     ),
                   ),
               ],
@@ -681,16 +697,11 @@ class _ServiceDetailsBottomSheetState extends State<ServiceDetailsBottomSheet> {
                 timeAtStop,
                 style: const TextStyle(
                   fontSize: 16,
+                  color: Colors.white,
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              Text(
-                '#$stopId',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
-              ),
+              
             ],
           ),
         ],

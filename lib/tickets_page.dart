@@ -145,15 +145,15 @@ class _TicketsPageState extends State<TicketsPage> {
                       borderRadius: BorderRadius.all(Radius.circular(25)),
                       color: Colors.black,
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
                             "Bilete",
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: Colors.white,
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -182,6 +182,8 @@ class TicketCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final segments = ticket['segments_details'] as List<dynamic>? ?? [];
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.black,
@@ -190,158 +192,133 @@ class TicketCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const SizedBox(height: 5),
-          SizedBox(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 5),
+            SizedBox(
               width: double.infinity,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Container(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 2, horizontal: 5),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        color: Colors.blue,
-                      ),
-                      child: Text(
-                        ticket['route_name'],
-                        style:
-                            const TextStyle(fontSize: 16, color: Colors.white),
-                      ),
+                    padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 5),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: getColorFromHex(ticket['service_color'] ?? '#0000FF'),
                     ),
-                  
-                  Text('${ticket['price']} RON',
-                  style: const TextStyle(color: Colors.white70)),
-                  
+                    child: Text(
+                      ticket['route_name'] ?? 'Unknown Route',
+                      style: const TextStyle(fontSize: 16, color: Colors.white),
+                    ),
+                  ),
+                  Text(
+                    '${ticket['price'] ?? '0.0'} RON',
+                    style: const TextStyle(color: Colors.white70),
+                  ),
                 ],
-              )),
-          const SizedBox(height: 10),
-          SizedBox(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    
-                    
-                    Expanded(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
+              ),
+            ),
+            const SizedBox(height: 10),
+            ...segments.map((segment) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                            ticket['start_stop_name'],
-                            style: const TextStyle(
-                                fontSize: 18, color: Colors.white),
-                          ),
                           Text(
-                            ticket['start_stop_city'],
-                            style: const TextStyle(
-                                fontSize: 12, color: Colors.white54),
+                            segment['start_stop_name'] ?? 'Unknown Start Stop',
+                            style: const TextStyle(fontSize: 18, color: Colors.white),
                           ),
-
-                            ],
-                          ),
-                          
-                          const Icon(
-                            FontAwesomeIcons.play,
-                            size: 18,
-                            color: Colors.white,
-                          ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                            ticket['end_stop_name'],
-                            style: const TextStyle(
-                                fontSize: 18, color: Colors.white),
-                          ),
-                              Text(
-                            ticket['end_stop_city'],
-                            style: const TextStyle(
-                                fontSize: 12, color: Colors.white54),
-                          ),
-                            ],
+                          const SizedBox(height: 4),
+                          Text(
+                            'Departure: ${segment['departure'] ?? 'Unknown'}',
+                            style: const TextStyle(fontSize: 14, color: Colors.white70),
                           ),
                         ],
-
+                      ),
+                      const Icon(
+                        FontAwesomeIcons.play,
+                        size: 18,
+                        color: Colors.white,
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            segment['end_stop_name'] ?? 'Unknown End Stop',
+                            style: const TextStyle(fontSize: 18, color: Colors.white),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Arrival: ${segment['arrival'] ?? 'Unknown'}',
+                            style: const TextStyle(fontSize: 14, color: Colors.white70),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              );
+            }).toList(),
+            if (isLatest) const SizedBox(height: 10),
+            if (isLatest)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    ticket['uid'] ?? 'Unknown UID',
+                    style: const TextStyle(color: Colors.white38),
+                  ),
+                ],
+              ),
+            if (isLatest)
+              const Divider(
+                color: Colors.white54,
+                thickness: 1,
+              ),
+            if (isLatest) const SizedBox(height: 10),
+            if (isLatest)
+              GestureDetector(
+                onTap: () {
+                  // Show bottom sheet with enlarged QR code
+                  showModalBottomSheet(
+                    context: context,
+                    showDragHandle: true,
+                    backgroundColor: Colors.white,
+                    builder: (context) => Center(
+                      child: BarcodeWidgetModal(
+                        data: ticket['qr_code'] ?? '',
                       ),
                     ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          if (isLatest)
-          const SizedBox(height: 10),
-          if (isLatest)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-             
-                  Text(
-                      
-                      '${DateTime.parse(ticket['service_start_time']).day}.${DateTime.parse(ticket['service_start_time']).month}.${DateTime.parse(ticket['service_start_time']).year}',
-                      
-                      style: const TextStyle(color: Colors.white38)),
-                      Text(
-                      
-                      ticket['uid'],
-                      
-                      style: const TextStyle(color: Colors.white38)),
-                
-              
-              
-            ],
-          ),
-          if (isLatest)
-            const Divider(
-              color: Colors.white54,
-              thickness: 1,
-            ),
-          if (isLatest) const SizedBox(height: 10),
-          if (isLatest)
-            GestureDetector(
-              onTap: () {
-                // Show bottom sheet with enlarged QR code
-                showModalBottomSheet(
-                  context: context,
-                  showDragHandle: true,
-                  backgroundColor: Colors.white,
-                  builder: (context) => Center(
-                    child: BarcodeWidgetModal(
-                      data: ticket['qr_code'],
+                  );
+                },
+                child: SizedBox(
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(15),
+                        bottomRight: Radius.circular(15),
+                      ),
+                      color: Colors.white,
                     ),
-                  ),
-                );
-              },
-              child: SizedBox(
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: const BoxDecoration(
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(15),
-                      bottomRight: Radius.circular(15),
+                    child: BarcodeWidget(
+                      data: ticket['qr_code'] ?? '',
                     ),
-                    color: Colors.white,
-                  ),
-                  child: BarcodeWidget(
-                    data: ticket['qr_code'],
                   ),
                 ),
               ),
-            ),
-          if (isLatest) const SizedBox(height: 5),
-        ]),
+            if (isLatest) const SizedBox(height: 5),
+          ],
+        ),
       ),
     );
   }
@@ -384,12 +361,18 @@ class BarcodeWidgetModal extends StatelessWidget {
 }
 
 
-Color hexStringToColor(String hexColor) {
-  // Add opacity value if necessary or ensure it's a proper 6-character hex code
-  final buffer = StringBuffer();
-  if (hexColor.length == 6) {
-    buffer.write('FF'); // Default to full opacity
+
+
+
+
+Color getColorFromHex(String hexColor) {
+  try {
+    hexColor = hexColor.toUpperCase().replaceAll("#", "");
+    if (hexColor.length == 6) {
+      return Color(int.parse("0xFF$hexColor"));
+    }
+    return Colors.blue;
+  } catch (e) {
+    return Colors.blue;
   }
-  buffer.write(hexColor);
-  return Color(int.parse(buffer.toString(), radix: 16));
 }

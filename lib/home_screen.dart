@@ -791,7 +791,7 @@ Widget _buildStopView(BuildContext context, Map<String, dynamic> stop) {
                   height: 28,
                   padding: const EdgeInsets.all(5),
                   decoration: const BoxDecoration(
-                    color: Colors.blue,
+                    color: Color(0xFF448AFF),
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(6),
                       bottomRight: Radius.circular(4),
@@ -819,7 +819,7 @@ Widget _buildStopView(BuildContext context, Map<String, dynamic> stop) {
                           horizontal: 8,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.blue, // Fixed color for routes
+                          color: getColorFromHex(route["color"]), // Fixed color for routes
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -1276,3 +1276,16 @@ Widget _buildSettingsBottomSheet(
     ),
   );
 }
+
+
+Color getColorFromHex(String hexColor) {
+    try {
+      hexColor = hexColor.toUpperCase().replaceAll("#", "");
+      if (hexColor.length == 6) {
+        return Color(int.parse("0xFF$hexColor"));
+      }
+      return Colors.blue;
+    } catch (e) {
+      return Colors.blue;
+    }
+  }

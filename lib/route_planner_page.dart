@@ -378,8 +378,8 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
                                                 ),
                                               ],
                                             ),
-                                            const Divider(
-                                              color: Colors.blue,
+                                             Divider(
+                                              color: getColorFromHex(route['first_leg']['route_color']),
                                               thickness: 2,
                                             ),
                                             Text(
@@ -535,8 +535,8 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
                                                 ),
                                               ],
                                             ),
-                                            const Divider(
-                                              color: Colors.blue,
+                                             Divider(
+                                              color: getColorFromHex(route['second_leg']['route_color']),
                                               thickness: 2,
                                             ),
                                             Text(
@@ -805,6 +805,18 @@ class _RoutePlannerPageState extends State<RoutePlannerPage> {
   }
 }
 
+Color getColorFromHex(String hexColor) {
+  try {
+    hexColor = hexColor.toUpperCase().replaceAll("#", "");
+    if (hexColor.length == 6) {
+      return Color(int.parse("0xFF$hexColor"));
+    }
+    return Colors.blue;
+  } catch (e) {
+    return Colors.blue;
+  }
+}
+
 Widget _buildRouteDetailsSheet(
     BuildContext context, Map<String, dynamic> route) {
   return Padding(
@@ -1070,11 +1082,11 @@ Widget _buildRouteDetailsSheet(
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    const SizedBox(
+                    SizedBox(
                       width: 80,
                       child: Icon(
                         FontAwesomeIcons.locationCrosshairs,
-                        color: Colors.blue,
+                        color: getColorFromHex(route['first_leg']['route_color']),
                         size: 16,
                       ),
                     ),
@@ -1110,10 +1122,10 @@ Widget _buildRouteDetailsSheet(
                 Expanded(
                   child: Row(
                     children: [
-                      const SizedBox(
+                      SizedBox(
                         width: 80,
                         child: VerticalDivider(
-                          color: Colors.blue, // Line color
+                          color: getColorFromHex(route['first_leg']['route_color']), // Line color
                           thickness: 2, // Line thickness
                         ),
                       ),
@@ -1187,9 +1199,9 @@ Widget _buildRouteDetailsSheet(
                     SizedBox(
                         width: 80,
                         child: route['transfer_type'] == 'walk'
-                            ? const Icon(
+                            ? Icon(
                                 FontAwesomeIcons.signHanging,
-                                color: Colors.blue,
+                                color: getColorFromHex(route['first_leg']['route_color']),
                                 size: 16,
                               )
                             : const Icon(
@@ -1339,11 +1351,11 @@ Widget _buildRouteDetailsSheet(
                   Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      const SizedBox(
+                      SizedBox(
                         width: 80,
                         child: Icon(
                           FontAwesomeIcons.signHanging,
-                          color: Colors.blue,
+                          color: getColorFromHex(route['second_leg']['route_color']),
                           size: 16,
                         ),
                       ),
@@ -1378,10 +1390,10 @@ Widget _buildRouteDetailsSheet(
                 Expanded(
                   child: Row(
                     children: [
-                      const SizedBox(
+                      SizedBox(
                         width: 80,
                         child: VerticalDivider(
-                          color: Colors.blue, // Line color
+                          color: getColorFromHex(route['second_leg']['route_color']), // Line color
                           thickness: 2, // Line thickness
                         ),
                       ),
@@ -1453,11 +1465,11 @@ Widget _buildRouteDetailsSheet(
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    const SizedBox(
+                    SizedBox(
                       width: 80,
                       child: Icon(
                         FontAwesomeIcons.locationDot,
-                        color: Colors.blue,
+                        color: getColorFromHex(route['second_leg']['route_color']),
                         size: 16,
                       ),
                     ),
@@ -1587,3 +1599,5 @@ Widget _buildRouteDetailsSheet(
               ],
             ));
 }
+
+
