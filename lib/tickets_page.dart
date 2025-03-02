@@ -5,6 +5,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:barcode/barcode.dart';
+import 'package:intl/intl.dart';
 
 class TicketsPage extends StatefulWidget {
   const TicketsPage({super.key});
@@ -183,11 +184,19 @@ class TicketCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final segments = ticket['segments_details'] as List<dynamic>? ?? [];
-
+    
     return Container(
       decoration: BoxDecoration(
         color: Colors.black,
         borderRadius: BorderRadius.circular(25.0),
+        boxShadow: const [
+          BoxShadow(
+            color: Color.fromARGB(14, 197, 197, 255),
+            spreadRadius: 2,
+            blurRadius: 20,
+            offset: Offset(0, 0),
+          ),
+        ],
       ),
       margin: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
       child: Padding(
@@ -196,22 +205,17 @@ class TicketCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 5),
+            
+            // Header row with route and price
             SizedBox(
               width: double.infinity,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 5),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      color: getColorFromHex(ticket['service_color'] ?? '#0000FF'),
-                    ),
-                    child: Text(
-                      ticket['route_name'] ?? 'Unknown Route',
-                      style: const TextStyle(fontSize: 16, color: Colors.white),
-                    ),
+                  Text(
+                    '${ticket['uid']}',
+                    style: const TextStyle(color: Colors.white54),
                   ),
                   Text(
                     '${ticket['price'] ?? '0.0'} RON',
@@ -220,72 +224,107 @@ class TicketCard extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 10),
-            ...segments.map((segment) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            
+            const SizedBox(height: 15),
+            
+            // Main content row with dynamic segments
+            SizedBox(
+              height: 80,
+              child: Row(
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            segment['start_stop_name'] ?? 'Unknown Start Stop',
-                            style: const TextStyle(fontSize: 18, color: Colors.white),
+                  // Left side - departure
+                  // Column(
+                  //   mainAxisAlignment: MainAxisAlignment.center,
+                  //   children: [
+                  //     Text(
+                  //       extractTimeFromDate(ticket['sold_at']),
+                  //       style: const TextStyle(
+                  //         color: Colors.white,
+                  //         fontSize: 14,
+                  //       ),
+                  //     ),
+                  //     Text(
+                  //       formatShortDate(ticket['sold_at']),
+                  //       style: const TextStyle(
+                  //         color: Colors.white54,
+                  //         fontSize: 12,
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
+                  
+                  const SizedBox(width: 10),
+                  
+                  // Dynamic segments in a row
+                  Expanded(
+                    child: Row(
+                      children: [
+                        for (int i = 0; i < segments.length; i++) ...[
+                          // Add each segment
+                          Expanded(
+                            child: buildSegmentColumn(segments[i]),
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Departure: ${segment['departure'] ?? 'Unknown'}',
-                            style: const TextStyle(fontSize: 14, color: Colors.white70),
-                          ),
+                          
+                          // Add connector between segments if not the last one
+                          if (i < segments.length - 1)
+                            const SizedBox(width: 10),
                         ],
-                      ),
-                      const Icon(
-                        FontAwesomeIcons.play,
-                        size: 18,
-                        color: Colors.white,
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            segment['end_stop_name'] ?? 'Unknown End Stop',
-                            style: const TextStyle(fontSize: 18, color: Colors.white),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Arrival: ${segment['arrival'] ?? 'Unknown'}',
-                            style: const TextStyle(fontSize: 14, color: Colors.white70),
-                          ),
-                        ],
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 10),
-                ],
-              );
-            }).toList(),
-            if (isLatest) const SizedBox(height: 10),
-            if (isLatest)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    ticket['uid'] ?? 'Unknown UID',
-                    style: const TextStyle(color: Colors.white38),
-                  ),
+                  
+                  const SizedBox(width: 10),
+                  
+                  // Right side - VAT info
+                  // Column(
+                  //   mainAxisAlignment: MainAxisAlignment.center,
+                  //   children: [
+                  //     const Text(
+                  //       'VAT',
+                  //       style: TextStyle(
+                  //         color: Colors.white54,
+                  //         fontSize: 14,
+                  //       ),
+                  //     ),
+                  //     Text(
+                  //       '${ticket['vat'] ?? '0.0'} RON',
+                  //       style: const TextStyle(
+                  //         color: Colors.white,
+                  //         fontSize: 14,
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
                 ],
               ),
+            ),
+            
+            
+            
+            // Additional information section
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                        'Sold at: ${formatFullDateTime(ticket['sold_at'])}',
+                        style: const TextStyle(
+                          color: Colors.white54,
+                          fontSize: 12,
+                        ),
+                      ),
+              ],
+            ),
+            
+            // QR code section for latest ticket
+            if (isLatest) const SizedBox(height: 10),
             if (isLatest)
               const Divider(
                 color: Colors.white54,
                 thickness: 1,
               ),
             if (isLatest) const SizedBox(height: 10),
-            if (isLatest)
+            if (isLatest && ticket['qr_code'] != null)
               GestureDetector(
                 onTap: () {
                   // Show bottom sheet with enlarged QR code
@@ -321,6 +360,134 @@ class TicketCard extends StatelessWidget {
         ),
       ),
     );
+  }
+  
+  // Build a single segment column with route name, divider, and duration
+  Widget buildSegmentColumn(Map segment) {
+  final routeColor = getColorFromHex(segment['route_color'] ?? '#0000FF');
+  
+  return Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      // Route name
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: Text(
+          segment['route_name'] ?? 'Unknown Route',
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Colors.white70,
+          ),
+        ),
+      ),
+      
+      // Color-coded divider
+      Divider(
+        color: routeColor,
+        thickness: 2,
+      ),
+      
+      // Start and end stops
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text(
+                segment['start_stop_name'],
+                textAlign: TextAlign.start,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+                style: const TextStyle(
+                  color: Colors.white54,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: Icon(
+                FontAwesomeIcons.caretRight,
+                color: Colors.white54,
+                size: 12,
+              ),
+            ),
+            Expanded(
+              child: Text(
+                segment['end_stop_name'],
+                textAlign: TextAlign.end,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+                style: const TextStyle(
+                  color: Colors.white54,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
+}
+  
+  // Helper method to extract just the time from a datetime string
+  String extractTimeFromDate(String? dateTimeString) {
+    if (dateTimeString == null || dateTimeString.isEmpty) return '--:--';
+    
+    try {
+      final dateTime = DateTime.parse(dateTimeString);
+      return DateFormat('HH:mm').format(dateTime);
+    } catch (e) {
+      return '--:--';
+    }
+  }
+  
+  // Helper method to format date as "dd MMM" (e.g., "02 MAR")
+  String formatShortDate(String? dateTimeString) {
+    if (dateTimeString == null || dateTimeString.isEmpty) return '-- ---';
+    
+    try {
+      final dateTime = DateTime.parse(dateTimeString);
+      return DateFormat('dd MMM').format(dateTime).toUpperCase();
+    } catch (e) {
+      return '-- ---';
+    }
+  }
+  
+  // Helper method for full date time formatting
+  String formatFullDateTime(String? dateTimeString) {
+    if (dateTimeString == null || dateTimeString.isEmpty) return 'Unknown';
+    
+    try {
+      final dateTime = DateTime.parse(dateTimeString);
+      return DateFormat('dd MMM yyyy, HH:mm').format(dateTime);
+    } catch (e) {
+      return 'Invalid Date';
+    }
+  }
+  
+  // Helper function to convert hex string to Color
+  Color getColorFromHex(String hexColor) {
+    // Add # if not present
+    hexColor = hexColor.replaceAll('#', '');
+    
+    if (hexColor.length == 6) {
+      hexColor = 'FF$hexColor';
+    }
+    
+    return Color(int.parse(hexColor, radix: 16));
+  }
+  
+  // Helper to get minimum of two integers
+  int min(int a, int b) {
+    return a < b ? a : b;
   }
 }
 
